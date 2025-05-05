@@ -3,7 +3,7 @@ import axios from "axios";
 
 const AuthForm = () => {
   const [email, setEmail] = useState("sapunamongar@example.com"); // Pre-provided email
-  const [password, setPassword] = useState("sapunamongar@123"); // Pre-provided password
+  const [password, setPassword] = useState("sapunamongar@123");
   const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
