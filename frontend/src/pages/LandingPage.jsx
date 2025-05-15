@@ -106,7 +106,7 @@ export default function LandingPage() {
               href="#"
               className={`${
                 scrolled ? "text-[rgb(14,12,85)]" : "text-white"
-              } hover:text-[rgb(14,12,85)] font-medium py-2 px-4 block md:inline transition-colors duration-300`}
+              } hover:text-[rgb(56,52,180)] font-medium py-2 px-4 block md:inline transition-colors duration-300`}
             >
               Home
             </a>

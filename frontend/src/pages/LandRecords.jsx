@@ -23,7 +23,7 @@ import {
 import { AiOutlineEye, AiOutlineDownload } from "react-icons/ai"; // For download icon
 import Swal from "sweetalert2";
 import logo from "../assets/images/logo.png";
-import { registerLand, getGovtLands } from "../../services/authService.js";
+import { registerLand, getGovtLands } from "../services/authService.js";
 const LandRecords = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
