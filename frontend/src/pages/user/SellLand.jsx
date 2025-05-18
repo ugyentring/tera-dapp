@@ -1,287 +1,410 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { FiSearch, FiLogOut, FiUser, FiMenu, FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import logo from "../../assets/images/logo.png";
-import landImage from "../../assets/images/land.jpg";
-import { MdLocationCity, MdCheckCircleOutline, MdGavel, MdHourglassEmpty } from 'react-icons/md';
-import { AiOutlineDownload } from "react-icons/ai"; // For download icon
-import { AiOutlineEye } from 'react-icons/ai';
-import React from 'react';
-import { FaCloudUploadAlt } from 'react-icons/fa';
-import swal from 'sweetalert2';
+import { FiMenu, FiUser } from "react-icons/fi";
+import swal from "sweetalert2";
 
 function SellLand() {
-    const navigate = useNavigate();
-    const [currentPage, setCurrentPage] = useState(1);
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
-    const [showSidebarText, setShowSidebarText] = useState(window.innerWidth >= 1024);
-    const [activeSidebarItem, setActiveSidebarItem] = useState(1);
-    const [viewModalOpen, setViewModalOpen] = useState(false);
-    const [selectedTransaction, setSelectedTransaction] = useState(null);
-    const itemsPerPage = 6; // Adjusted to potentially fit 3 cards better
+  const navigate = useNavigate();
 
-    const allTransactions = Array.from({ length: 100 }, (_, index) => ({
-        id: `TXN-${index + 1}`,
-        owner: `Owner ${index + 1}`,
-        land: `LP-${index + 1}`,
-        date: `Jan ${index + 1}, 2025`,
-        status: index % 3 === 0 ? "Rejected" : index % 3 === 1 ? "Pending" : "Approved", // Randomly assign status
-        type: index % 3 === 0 ? "Buy" : index % 3 === 1 ? "Sell" : "Inheritance", // Randomly assign transaction type
-        buyerInfo: { name: `Buyer ${index + 1}`, email: `buyer${index + 1}@example.com` },
-        sellerInfo: { name: `Seller ${index + 1}`, email: `seller${index + 1}@example.com` },
-        landInfo: { location: `Location ${index + 1}`, size: `${(index + 1) * 10} sq.m` },
-        documentUrl: "asdf",
-        imageUrl: `https://via.placeholder.com/300/${Math.floor(Math.random() * 16777215).toString(16)}/FFFFFF?Text=Land+Image`, // Placeholder image URL
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
+  const [showSidebarText, setShowSidebarText] = useState(window.innerWidth >= 1024);
+  const [activeSidebarItem, setActiveSidebarItem] = useState(1);
+
+  // Form states
+  const [uploadedImages, setUploadedImages] = useState([]);
+  const [uploadedDocument, setUploadedDocument] = useState(null);
+  const [confirmed, setConfirmed] = useState(false);
+
+  // Controlled inputs state for validation
+  const [formData, setFormData] = useState({
+    plotId: "",
+    size: "",
+    dzongkhag: "",
+    gewog: "",
+    village: "",
+    ownershipStatus: "",
+    price: "",
+    saleType: "",
+    availability: "",
+    landDescription: "",
+    sellerName: "",
+    contactNumber: "",
+  });
+
+  // Validation errors
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    let errs = {};
+
+    if (!formData.plotId.trim()) errs.plotId = "Plot ID is required.";
+    if (!formData.size.trim() || isNaN(formData.size) || Number(formData.size) <= 0) errs.size = "Valid Size is required.";
+    if (!formData.dzongkhag.trim()) errs.dzongkhag = "Dzongkhag is required.";
+    if (!formData.gewog.trim()) errs.gewog = "Gewog is required.";
+    if (!formData.village.trim()) errs.village = "Village is required.";
+    if (!formData.ownershipStatus.trim()) errs.ownershipStatus = "Ownership Status is required.";
+
+    if (!formData.price.trim() || isNaN(formData.price) || Number(formData.price) <= 0) errs.price = "Valid Price is required.";
+    if (!formData.saleType.trim()) errs.saleType = "Sale Type is required.";
+    if (!formData.availability.trim()) errs.availability = "Availability is required.";
+
+    if (!formData.landDescription.trim()) errs.landDescription = "Land Description is required.";
+
+    if (!formData.sellerName.trim()) errs.sellerName = "Seller Name is required.";
+    if (!formData.contactNumber.trim() || !/^\+?\d{7,15}$/.test(formData.contactNumber.trim())) 
+      errs.contactNumber = "Valid Contact Number is required.";
+
+    if (!confirmed) errs.confirmed = "You must confirm that details are accurate.";
+
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (!validate()) {
+      const firstError = Object.values(errors)[0] || "Please fill in all required fields correctly.";
+      swal.fire({
+        icon: "error",
+        title: "Validation Error",
+        text: firstError,
+        confirmButtonColor: "#142854",
+      });
+      return;
+    }
+    swal.fire({
+      title: "Success!",
+      text: "Details submitted successfully.",
+      icon: "success",
+      confirmButtonColor: "#142854",
+    });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
+
+  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    const filePreviews = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
     }));
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentTransactions = allTransactions.slice(indexOfFirstItem, indexOfLastItem);
+    uploadedImages.forEach((img) => URL.revokeObjectURL(img.preview));
+    setUploadedImages(filePreviews);
+  };
 
-    const totalPages = Math.ceil(allTransactions.length / itemsPerPage);
+  const handleDocumentChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (uploadedDocument) URL.revokeObjectURL(uploadedDocument.preview);
+      setUploadedDocument(file);
+    }
+  };
 
-    const handlePageChange = (pageNumber) => {
-        if (pageNumber >= 1 && pageNumber <= totalPages) {
-            setCurrentPage(pageNumber);
-        }
+  const handleCancel = () => {
+    setUploadedImages((imgs) => {
+      imgs.forEach((img) => URL.revokeObjectURL(img.preview));
+      return [];
+    });
+    if (uploadedDocument) URL.revokeObjectURL(uploadedDocument.preview);
+    setUploadedDocument(null);
+    setConfirmed(false);
+    setFormData({
+      plotId: "",
+      size: "",
+      dzongkhag: "",
+      gewog: "",
+      village: "",
+      ownershipStatus: "",
+      price: "",
+      saleType: "",
+      availability: "",
+      landDescription: "",
+      sellerName: "",
+      contactNumber: "",
+    });
+    setErrors({});
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((f) => ({ ...f, [name]: value }));
+    setErrors((errs) => ({ ...errs, [name]: undefined }));
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSidebarOpen(window.innerWidth >= 1024);
+      setShowSidebarText(window.innerWidth >= 1024);
     };
-    const handleSubmit = () => {
-        new swal({
-            title: "Success!",
-            text: "Details submitted successfully.",
-            icon: "success",
-            button: "OK",
-            confirmButtonColor: '#142854'
-        });
+
+    window.addEventListener("resize", handleResize);
+    handleResize();
+
+    return () => {
+      uploadedImages.forEach((img) => URL.revokeObjectURL(img.preview));
+      if (uploadedDocument) URL.revokeObjectURL(uploadedDocument.preview);
+      window.removeEventListener("resize", handleResize);
     };
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        navigate("/");
-    };
+  }, [uploadedImages, uploadedDocument]);
 
-    const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
-    const toggleSidebarMobile = () => setSidebarOpen(!sidebarOpen);
-    const toggleSidebarDesktop = () => {
-        setSidebarOpen(!sidebarOpen);
-        setShowSidebarText(!showSidebarText);
-    };
-    const openViewModal = (transaction) => {
-        setSelectedTransaction(transaction);
-        setViewModalOpen(true);
-    };
-
-    const closeViewModal = () => {
-        setViewModalOpen(false);
-        setSelectedTransaction(null);
-    };
-
-
-    const handleSidebarItemClick = (pageNumber) => {
-        setActiveSidebarItem(pageNumber);
-        navigate(pageNumber === 1 ? "/dashboard" : pageNumber === 2 ? "/transactions" : pageNumber === 3 ? "/land-records" : "/land-disputes");
-        if (window.innerWidth < 1024) {
-            setSidebarOpen(false);
-        }
-    };
-
-    useEffect(() => {
-        const handleResize = () => {
-            setSidebarOpen(window.innerWidth >= 1024);
-            setShowSidebarText(window.innerWidth >= 1024);
-        };
-
-        window.addEventListener("resize", handleResize);
-        handleResize();
-
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
-
-    return (
-        <div className="min-h-screen w-full bg-gray-100 flex flex-row">
-            <div className="flex-grow p-4 sm:p-8 pt-16">
-
-                {/* Header for Desktop */}
-                <div className="rounded-lg hidden sm:flex justify-between items-center mb-6 sticky top-0 bg-white z-10 shadow-md p-4">
-                    <div className="flex items-center gap-4 ">
-                        <button onClick={toggleSidebarMobile} className="lg:hidden mr-4">
-                            <FiMenu className="text-2xl text-gray-700" />
-                        </button>
-                        <h1 className="font-semibold text-gray-800 ml-5">Sell Land</h1>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        <div className="relative">
-                            <div className="relative">
-                                <FiUser
-                                    className="text-2xl cursor-pointer mr-5"
-                                    onClick={toggleDropdown}
-                                />
-                                {dropdownOpen && (
-                                    <div className="absolute right-5 mt-2 bg-white border rounded shadow-lg w-48 origin-top-right">
-                                        <ul className="py-2 flex flex-col items-center justify-center">
-                                            <li
-                                                className="block px-4 py-2 text-gray-700 hover:bg-[#003366] hover:text-white active:bg-[#003366] active:text-white transition-colors duration-200 cursor-pointer w-full text-left text-sm"
-                                                onClick={() => navigate("/profile")}
-                                            >
-                                                Profile
-                                            </li>
-                                            <li
-                                                className="block px-4 py-2 text-gray-700 hover:bg-[#003366] hover:text-white active:bg-[#003366] active:text-white transition-colors duration-200 cursor-pointer w-full text-left text-sm"
-                                                onClick={() => navigate("/settings")}
-                                            >
-                                                Settings
-                                            </li>
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
+  return (
+    <div className="min-h-screen w-full bg-gray-100 flex flex-row">
+      <div className="flex-grow p-4 sm:p-8 pt-16">
+        {/* Header for Desktop */}
+        <div className="rounded-lg hidden sm:flex justify-between items-center mb-6 bg-white z-10 shadow-md p-4">
+          <div className="flex items-center gap-4 ">
+            <button onClick={() => setSidebarOpen((o) => !o)} className="lg:hidden mr-4">
+              <FiMenu className="text-2xl text-gray-700" />
+            </button>
+            <h1 className="font-semibold text-gray-800 ml-5">Sell Land</h1>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <FiUser className="text-2xl cursor-pointer mr-5" onClick={toggleDropdown} />
+              {dropdownOpen && (
+                <div className="absolute right-5 mt-2 bg-white border rounded shadow-lg w-48 origin-top-right z-20">
+                  <ul className="py-2 flex flex-col items-center justify-center">
+                    <li
+                      className="block px-4 py-2 text-gray-700 hover:bg-[#003366] hover:text-white cursor-pointer w-full text-left text-sm"
+                      onClick={() => navigate("/user-profile")}
+                    >
+                      Profile
+                    </li>
+                    <li
+                      className="block px-4 py-2 text-gray-700 hover:bg-[#003366] hover:text-white cursor-pointer w-full text-left text-sm"
+                      onClick={() => navigate("/settings")}
+                    >
+                      Settings
+                    </li>
+                  </ul>
                 </div>
-                <div className="bg-gray-50 p-6 sm:p-10">
-                    <h2 className="text-center text-3xl font-semibold text-gray-900 mb-8">List Land for Sale</h2>
-
-                    {/* Land Details */}
-                    <div className="mb-8">
-                        <h3 className="text-xl font-semibold text-gray-800 mb-5">Land Details</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <input
-                                type="text"
-                                placeholder="Plot ID"
-                                className="input-field border-2 border-gray-300 rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-[#142854] text-sm transition-all duration-300"
-                                aria-label="Plot ID"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Size (Acres)"
-                                className="input-field border-2 border-gray-300 rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-[#142854] text-sm transition-all duration-300"
-                                aria-label="Size in Acres"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Dzongkhag"
-                                className="input-field border-2 border-gray-300 rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-[#142854] text-sm transition-all duration-300"
-                                aria-label="Dzongkhag"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Gewog"
-                                className="input-field border-2 border-gray-300 rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-[#142854] text-sm transition-all duration-300"
-                                aria-label="Gewog"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Village"
-                                className="input-field border-2 border-gray-300 rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-[#142854] text-sm transition-all duration-300"
-                                aria-label="Village"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Ownership Status"
-                                className="input-field border-2 border-gray-300 rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-[#142854] text-sm transition-all duration-300"
-                                aria-label="Ownership Status"
-                            />
-                        </div>
-                        <div className="mt-6">
-                            <button className="bg-[#142854] hover:bg-[#142854]/80 text-white px-5 py-2 rounded-md text-sm flex items-center space-x-2 transition-all duration-300 ease-in-out shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#142854]">
-                                <span><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="white" className="w-5 h-5">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.14-3.225 4.5 4.5 0 01-3.225-1.14M19.5 19.5a4.5 4.5 0 01-1.14-3.225 4.5 4.5 0 01-3.225-1.14M12 2.25c-5.23 0-9.75 4.691-9.75 10.5S6.77 23.25 12 23.25 21.75 18.559 21.75 12.75 17.23 2.25 12 2.25z" />
-                                </svg>
-                                </span>
-                                <span>Upload Images</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Sale Details */}
-                    <div className="mb-8">
-                        <h3 className="text-xl font-semibold text-gray-800 mb-5">Sale Details</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <input
-                                type="text"
-                                placeholder="Price (Nu)"
-                                className="input-field border-2 border-gray-300 rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-[#142854] text-sm transition-all duration-300"
-                                aria-label="Price"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Sale Type"
-                                className="input-field border-2 border-gray-300 rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-[#142854] text-sm transition-all duration-300"
-                                aria-label="Sale Type"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Availability"
-                                className="input-field border-2 border-gray-300 rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-[#142854] text-sm transition-all duration-300"
-                                aria-label="Availability"
-                            />
-                        </div>
-                        <textarea
-                            placeholder="Land Description"
-                            rows="4"
-                            className="mt-6 w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#142854] text-sm transition-all duration-300"
-                            aria-label="Land Description"
-                        />
-                    </div>
-
-                    {/* Contact */}
-                    <div className="mb-6">
-                        <h3 className="text-xl font-semibold text-gray-800 mb-5">Contact Information</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <input
-                                type="text"
-                                placeholder="Seller Name"
-                                className="input-field border-2 border-gray-300 rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-[#142854] text-sm transition-all duration-300"
-                                aria-label="Seller Name"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Contact Number"
-                                className="input-field border-2 border-gray-300 rounded-md p-2.5 focus:outline-none focus:ring-2 focus:ring-[#142854] text-sm transition-all duration-300"
-                                aria-label="Contact Number"
-                            />
-                        </div>
-
-                        <div className="mt-4">
-                            <button className="bg-[#142854] hover:bg-[#0f1f38] text-white px-3 py-2 rounded-md text-xs flex items-center space-x-2 transition-all duration-300 ease-in-out shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#142854]">
-                                <FaCloudUploadAlt className="text-white h-4 w-4" />
-                                <span>Upload Land Ownership Document</span>
-                            </button>
-                        </div>
-                    </div>
-
-
-                    {/* Checkbox for Confirmation */}
-                    <div className="mb-6">
-                        <label className="inline-flex items-start space-x-2">
-                            <input
-                                type="checkbox"
-                                className="h-4 w-4 accent-[#142854] border-gray-300 rounded focus:ring-[#142854] transition-all duration-300"
-                                aria-label="Confirm details"
-                            />
-                            <span className="text-sm text-gray-700">
-                                I confirm that the provided details are accurate and I am authorized to sell this land.
-                            </span>
-                        </label>
-                    </div>
-
-                    {/* Buttons */}
-                    <div className="flex justify-end space-x-3 mt-3">
-                        <button className="bg-[#FF0000] hover:bg-[#cc0000] text-white px-3 py-1.5 rounded text-xs font-medium transition duration-200">
-                            Cancel
-                        </button>
-
-                        <button
-                            className="bg-[#142854] hover:bg-[#0f1f38] text-white px-3 py-1.5 rounded text-xs font-medium transition duration-200"
-                            onClick={handleSubmit}
-                        >
-                            Submit
-                        </button>
-
-                    </div>
-                </div>
+              )}
             </div>
+          </div>
         </div>
-    );
+
+        <div className="bg-gray-50 p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full rounded-md shadow-md">
+          <h2 className="text-center text-2xl sm:text-3xl font-semibold text-gray-900 mb-8">
+            List Land for Sale
+          </h2>
+
+          {/* Land Details */}
+          <div className="mb-10">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-5">Land Details</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {[
+                { name: "plotId", placeholder: "Plot ID" },
+                { name: "size", placeholder: "Size (Acres)" },
+                { name: "dzongkhag", placeholder: "Dzongkhag" },
+                { name: "gewog", placeholder: "Gewog" },
+                { name: "village", placeholder: "Village" },
+                { name: "ownershipStatus", placeholder: "Ownership Status" },
+              ].map(({ name, placeholder }, i) => (
+                <div key={i} className="flex flex-col">
+                  <input
+                    type="text"
+                    name={name}
+                    placeholder={placeholder}
+                    value={formData[name]}
+                    onChange={handleInputChange}
+                    className={`w-full border-2 rounded-md p-2.5 text-sm focus:outline-none focus:ring-2 transition-all duration-300 ${
+                      errors[name]
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-[#142854]"
+                    }`}
+                    aria-label={placeholder}
+                  />
+                  {errors[name] && (
+                    <span className="text-red-600 text-xs mt-1">{errors[name]}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Upload Images Button */}
+            <div className="mt-6 flex items-center space-x-4">
+              <label
+                htmlFor="imageUpload"
+                className="cursor-pointer rounded-md border border-[#003366] bg-[#003366] px-4 py-2 text-white hover:bg-[#142854] transition-colors"
+              >
+                Upload Images
+              </label>
+              <input
+                id="imageUpload"
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageChange}
+              />
+              {uploadedImages.length > 0 && (
+                <span className="text-gray-700 text-sm">
+                  {uploadedImages.length} image(s) selected
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-3 gap-2 mt-4">
+              {uploadedImages.map(({ file, preview }, idx) => (
+                <img
+                  key={idx}
+                  src={preview}
+                  alt={`Uploaded preview ${idx + 1}`}
+                  className="rounded-md object-cover w-full h-28"
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Price and Sale Information */}
+          <div className="mb-10">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-5">Price and Sale Information</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {[
+                { name: "price", placeholder: "Price" },
+                { name: "saleType", placeholder: "Sale Type" },
+                { name: "availability", placeholder: "Availability" },
+              ].map(({ name, placeholder }, i) => (
+                <div key={i} className="flex flex-col">
+                  <input
+                    type="text"
+                    name={name}
+                    placeholder={placeholder}
+                    value={formData[name]}
+                    onChange={handleInputChange}
+                    className={`w-full border-2 rounded-md p-2.5 text-sm focus:outline-none focus:ring-2 transition-all duration-300 ${
+                      errors[name]
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-[#142854]"
+                    }`}
+                    aria-label={placeholder}
+                  />
+                  {errors[name] && (
+                    <span className="text-red-600 text-xs mt-1">{errors[name]}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Land Description */}
+          <div className="mb-10">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-5">Land Description</h3>
+            <textarea
+              rows={5}
+              placeholder="Land Description"
+              name="landDescription"
+              value={formData.landDescription}
+              onChange={handleInputChange}
+              className={`w-full border-2 rounded-md p-2.5 text-sm focus:outline-none focus:ring-2 transition-all duration-300 ${
+                errors.landDescription
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-[#142854]"
+              }`}
+              aria-label="Land Description"
+            />
+            {errors.landDescription && (
+              <span className="text-red-600 text-xs mt-1">{errors.landDescription}</span>
+            )}
+          </div>
+
+          {/* Seller Details */}
+          <div className="mb-10">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-5">Seller Details</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {[
+                { name: "sellerName", placeholder: "Seller Name" },
+                { name: "contactNumber", placeholder: "Contact Number" },
+              ].map(({ name, placeholder }, i) => (
+                <div key={i} className="flex flex-col">
+                  <input
+                    type="text"
+                    name={name}
+                    placeholder={placeholder}
+                    value={formData[name]}
+                    onChange={handleInputChange}
+                    className={`w-full border-2 rounded-md p-2.5 text-sm focus:outline-none focus:ring-2 transition-all duration-300 ${
+                      errors[name]
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-[#142854]"
+                    }`}
+                    aria-label={placeholder}
+                  />
+                  {errors[name] && (
+                    <span className="text-red-600 text-xs mt-1">{errors[name]}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Upload Documents */}
+          <div className="mb-6">
+            <label
+              htmlFor="docUpload"
+              className="cursor-pointer rounded-md border border-[#003366] bg-[#003366] px-4 py-2 text-white hover:bg-[#142854] transition-colors"
+            >
+              Upload Document
+            </label>
+            <input
+              id="docUpload"
+              type="file"
+              accept="application/pdf, image/*"
+              className="hidden"
+              onChange={handleDocumentChange}
+            />
+            {uploadedDocument && (
+              <div className="mt-2 text-sm text-gray-700">
+                Selected document: {uploadedDocument.name}
+              </div>
+            )}
+          </div>
+
+          {/* Confirmation Checkbox */}
+          <div className="mb-6 flex items-center">
+            <input
+              id="confirmation"
+              type="checkbox"
+              checked={confirmed}
+              onChange={() => {
+                setConfirmed((c) => !c);
+                setErrors((errs) => ({ ...errs, confirmed: undefined }));
+              }}
+              className={`mr-2 cursor-pointer ${
+                errors.confirmed ? "border-red-500" : ""
+              }`}
+            />
+            <label htmlFor="confirmation" className="cursor-pointer select-none text-sm text-gray-900">
+              I confirm that the details provided above are accurate to the best of my knowledge.
+            </label>
+          </div>
+          {errors.confirmed && (
+            <div className="text-red-600 text-xs mb-4">{errors.confirmed}</div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={handleSubmit}
+              className="px-12 py-2 rounded-md bg-[#003366] hover:bg-[#142854] text-white"
+            >
+              Submit
+            </button>
+            <button
+              onClick={handleCancel}
+              className="px-12 py-2 rounded-md border border-[#003366] hover:border-[#142854] text-[#003366] hover:text-[#142854]"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default SellLand;

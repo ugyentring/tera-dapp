@@ -1,24 +1,20 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState } from 'react';
+import axios from 'axios';
 
 const AuthForm = () => {
-  const [email, setEmail] = useState("sapunamongar@example.com"); // Pre-provided email
-  const [password, setPassword] = useState("sapunamongar@123");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('sapunamongar@example.com'); // Pre-provided email
+  const [password, setPassword] = useState('sapunamongar@123');  // Pre-provided password
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        { email, password }
-      );
-      localStorage.setItem("token", response.data.token);
-      window.location.href = "/dashboard";
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/login`, { email, password });
+      localStorage.setItem('token', response.data.token);
+      window.location.href = '/dashboard';
     } catch (err) {
-      setError("Invalid credentials");
-      censole.error("Login Error:", err);
+      setError('Invalid credentials');
     }
   };
 

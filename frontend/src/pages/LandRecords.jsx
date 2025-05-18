@@ -1,38 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  FiSearch,
-  FiLogOut,
-  FiUser,
-  FiMenu,
-  FiPlus,
-  FiX,
-  FiChevronLeft,
-  FiChevronRight,
-} from "react-icons/fi";
-import {
-  MdDashboard,
-  MdOutlineHome,
-  MdOutlineGavel,
-  MdOutlineTransferWithinAStation,
-  MdLocationCity,
-  MdCheckCircleOutline,
-  MdGavel,
-  MdHourglassEmpty,
-} from "react-icons/md";
-import { AiOutlineEye, AiOutlineDownload } from "react-icons/ai"; // For download icon
-import Swal from "sweetalert2";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FiSearch, FiLogOut, FiUser, FiMenu, FiPlus, FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { MdDashboard, MdOutlineHome, MdOutlineGavel, MdOutlineTransferWithinAStation, MdLocationCity, MdCheckCircleOutline, MdGavel, MdHourglassEmpty } from 'react-icons/md';
+import { AiOutlineEye, AiOutlineDownload } from 'react-icons/ai'; // For download icon
+import Swal from 'sweetalert2';
 import logo from "../assets/images/logo.png";
-import { registerLand, getGovtLands } from "../services/authService.js";
+import { registerLand, getGovtLands } from '../services/authService';
+
 const LandRecords = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [activeSidebarItem, setActiveSidebarItem] = useState(3); // Land Records is active by default
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
-  const [showSidebarText, setShowSidebarText] = useState(
-    window.innerWidth >= 1024
-  );
+  const [showSidebarText, setShowSidebarText] = useState(window.innerWidth >= 1024);
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [lands, setLands] = useState([]);
@@ -47,20 +28,20 @@ const LandRecords = () => {
   const [loading, setLoading] = useState(true);
 
   const [editFormData, setEditFormData] = useState({
-    landType: "",
-    location: "",
-    landSize: "",
-    boundaryDetails: "",
-    ownerName: "",
-    cidNumber: "",
-    contactNumber: "",
-    emailAddress: "",
-    ownershipType: "",
-    coOwners: "",
-    ownershipProof: "", // Assuming you want to display existing names
-    thramCopy: "",
-    surveyReport: "",
-    taxClearance: "",
+    landType: '',
+    location: '',
+    landSize: '',
+    boundaryDetails: '',
+    ownerName: '',
+    cidNumber: '',
+    contactNumber: '',
+    emailAddress: '',
+    ownershipType: '',
+    coOwners: '',
+    ownershipProof: '', // Assuming you want to display existing names
+    thramCopy: '',
+    surveyReport: '',
+    taxClearance: '',
   });
   const [formData, setFormData] = useState({
     landType: "",
@@ -78,10 +59,10 @@ const LandRecords = () => {
     const fetchLands = async () => {
       try {
         const data = await getGovtLands();
-        console.log("Fetched Government Lands:", data);
+        console.log('Fetched Government Lands:', data);
         setLands(data.data);
       } catch (err) {
-        console.error("Error fetching lands:", err);
+        console.error('Error fetching lands:', err);
         setError(err);
       } finally {
         setLoading(false);
@@ -94,18 +75,18 @@ const LandRecords = () => {
   const handleEditLand = (land) => {
     setSelectedLand(land); // Store the selected land
     setEditFormData({
-      id: land.id || "",
-      owner: land.owner || "",
-      location: land.location || "",
-      date: land.date || "",
-      landType: land.landType || "",
-      landSize: land.landSize || "",
-      boundaryDetails: land.boundaryDetails || "",
-      cidNumber: land.cidNumber || "",
-      contactNumber: land.contactNumber || "",
-      emailAddress: land.emailAddress || "",
-      ownershipType: land.ownershipType || "",
-      coOwners: land.coOwners || "",
+      id: land.id || '',
+      owner: land.owner || '',
+      location: land.location || '',
+      date: land.date || '',
+      landType: land.landType || '',
+      landSize: land.landSize || '',
+      boundaryDetails: land.boundaryDetails || '',
+      cidNumber: land.cidNumber || '',
+      contactNumber: land.contactNumber || '',
+      emailAddress: land.emailAddress || '',
+      ownershipType: land.ownershipType || '',
+      coOwners: land.coOwners || '',
     });
     setIsEditModalOpen(true); // Open the edit modal
   };
@@ -125,7 +106,7 @@ const LandRecords = () => {
 
   const handleUpdateLand = (e) => {
     e.preventDefault();
-    console.log("Updating land with:", editFormData);
+    console.log('Updating land with:', editFormData);
     setIsEditModalOpen(false);
     setSelectedLand(null);
   };
@@ -136,12 +117,8 @@ const LandRecords = () => {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentLands = Array.isArray(lands)
-    ? lands.slice(indexOfFirstItem, indexOfLastItem)
-    : [];
-  const totalPages = Array.isArray(lands)
-    ? Math.ceil(lands.length / itemsPerPage)
-    : 0;
+  const currentLands = Array.isArray(lands) ? lands.slice(indexOfFirstItem, indexOfLastItem) : [];
+  const totalPages = Array.isArray(lands) ? Math.ceil(lands.length / itemsPerPage) : 0;
 
   const handlePageChange = (pageNumber) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
@@ -150,8 +127,8 @@ const LandRecords = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/");
+    localStorage.removeItem('token');
+    navigate('/');
   };
 
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
@@ -166,13 +143,10 @@ const LandRecords = () => {
   const handleSidebarItemClick = (pageNumber) => {
     setActiveSidebarItem(pageNumber);
     navigate(
-      pageNumber === 1
-        ? "/dashboard"
-        : pageNumber === 2
-        ? "/transactions"
-        : pageNumber === 3
-        ? "/land-records"
-        : "/land-disputes"
+      pageNumber === 1 ? "/dashboard" :
+        pageNumber === 2 ? "/transactions" :
+          pageNumber === 3 ? "/land-records" :
+            "/land-disputes"
     );
     if (window.innerWidth < 1024) {
       setSidebarOpen(false);
@@ -185,8 +159,8 @@ const LandRecords = () => {
       setShowSidebarText(window.innerWidth >= 1024);
     };
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -196,10 +170,10 @@ const LandRecords = () => {
       const result = await registerLand(formData); // Send JSON directly
       console.log("Land registered successfully:", result);
       Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: result.message || "Land registered successfully!",
-        confirmButtonColor: "#142854",
+        icon: 'success',
+        title: 'Success!',
+        text: result.message || 'Land registered successfully!',
+        confirmButtonColor: '#142854'
       });
 
       setRegistrationSuccess(result.message || "Land registered successfully!");
@@ -223,20 +197,13 @@ const LandRecords = () => {
       console.error("Error submitting land registration:", error);
 
       Swal.fire({
-        icon: "error",
-        title: "Registration Failed",
-        text:
-          error.response?.data?.message ||
-          error.message ||
-          "Land registration failed",
-        confirmButtonColor: "#003366",
+        icon: 'error',
+        title: 'Registration Failed',
+        text: error.response?.data?.message || error.message || "Land registration failed",
+        confirmButtonColor: '#003366'
       });
 
-      setRegistrationError(
-        error.response?.data?.message ||
-          error.message ||
-          "Land registration failed"
-      );
+      setRegistrationError(error.response?.data?.message || error.message || "Land registration failed");
       setRegistrationSuccess(null);
     }
   };
@@ -247,12 +214,13 @@ const LandRecords = () => {
   };
 
   const handleDeleteLand = (landId) => {
-    const updatedLands = lands.filter((land) => land.id !== landId);
+    const updatedLands = lands.filter(land => land.id !== landId);
     setLands(updatedLands); // Update the state with the filtered list
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
+
       <div className="flex-grow p-4 sm:p-8 pt-16">
         <div className="sticky top-0 bg-white z-20 shadow-md h-16 flex justify-between items-center p-4 sm:hidden">
           <button onClick={toggleSidebarMobile} className="mr-2">
@@ -260,6 +228,7 @@ const LandRecords = () => {
           </button>
           <h1 className="text-xl font-semibold text-gray-800">Land Records</h1>
           <div className="flex items-center space-x-2">
+
             <div className="relative">
               <FiUser
                 className="text-2xl cursor-pointer ml-2"
@@ -292,11 +261,10 @@ const LandRecords = () => {
             <button onClick={toggleSidebarMobile} className="lg:hidden mr-4">
               <FiMenu className="text-2xl text-gray-700" />
             </button>
-            <h2 className=" col-span-full text-xl font-semibold text-gray-800 ">
-              Land Records
-            </h2>
+            <h2 className=" col-span-full text-xl font-semibold text-gray-800 ">Land Records</h2>
           </div>
           <div className="flex items-center space-x-4">
+
             <div className="relative">
               <div className="relative">
                 <FiUser
@@ -326,6 +294,7 @@ const LandRecords = () => {
           </div>
         </div>
 
+
         {/* Register New Land Button */}
         <div className="mb-6">
           <button
@@ -345,49 +314,16 @@ const LandRecords = () => {
                   &times;
                 </button>
               </div>
-              <h2 className="text-2xl font-semibold mb-6 text-center">
-                New Land Registration
-              </h2>
+              <h2 className="text-2xl font-semibold mb-6 text-center">New Land Registration</h2>
               <form onSubmit={handleSubmit}>
                 {/* Land Details */}
                 <div className="mb-6 p-4 border rounded-lg shadow-sm">
                   <h3 className="text-xl font-semibold mb-4">Land Details</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <input
-                      type="text"
-                      id="landType"
-                      value={formData.landType}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border rounded"
-                      placeholder="Land Type"
-                      required
-                    />
-                    <input
-                      type="text"
-                      id="location"
-                      value={formData.location}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border rounded"
-                      placeholder="Location"
-                      required
-                    />
-                    <input
-                      type="text"
-                      id="landSize"
-                      value={formData.landSize}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border rounded"
-                      placeholder="Land Size"
-                      required
-                    />
-                    <textarea
-                      id="boundaryDetails"
-                      value={formData.boundaryDetails}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border rounded"
-                      placeholder="Boundary Details"
-                      required
-                    ></textarea>
+                    <input type="text" id="landType" value={formData.landType} onChange={handleInputChange} className="w-full p-2 border rounded" placeholder="Land Type" required />
+                    <input type="text" id="location" value={formData.location} onChange={handleInputChange} className="w-full p-2 border rounded" placeholder="Location" required />
+                    <input type="text" id="landSize" value={formData.landSize} onChange={handleInputChange} className="w-full p-2 border rounded" placeholder="Land Size" required />
+                    <textarea id="boundaryDetails" value={formData.boundaryDetails} onChange={handleInputChange} className="w-full p-2 border rounded" placeholder="Boundary Details" required></textarea>
                   </div>
                 </div>
 
@@ -395,75 +331,21 @@ const LandRecords = () => {
                 <div className="mb-6 p-4 border rounded-lg shadow-sm">
                   <h3 className="text-xl font-semibold mb-4">Owner Details</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <input
-                      type="text"
-                      id="ownerName"
-                      value={formData.ownerName}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border rounded"
-                      placeholder="Owner Name"
-                      required
-                    />
-                    <input
-                      type="text"
-                      id="cidNumber"
-                      value={formData.cidNumber}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border rounded"
-                      placeholder="CID Number"
-                      required
-                    />
-                    <input
-                      type="text"
-                      id="contactNumber"
-                      value={formData.contactNumber}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border rounded"
-                      placeholder="Contact Number"
-                      required
-                    />
-                    <input
-                      type="email"
-                      id="emailAddress"
-                      value={formData.emailAddress}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border rounded"
-                      placeholder="Email Address"
-                      required
-                    />
-                    <input
-                      type="text"
-                      id="ownershipType"
-                      value={formData.ownershipType}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border rounded"
-                      placeholder="Ownership Type"
-                      required
-                    />
-                    <input
-                      type="text"
-                      id="coOwners"
-                      value={formData.coOwners}
-                      onChange={handleInputChange}
-                      className="w-full p-2 border rounded"
-                      placeholder="Co-Owners (if any)"
-                    />
+                    <input type="text" id="ownerName" value={formData.ownerName} onChange={handleInputChange} className="w-full p-2 border rounded" placeholder="Owner Name" required />
+                    <input type="text" id="cidNumber" value={formData.cidNumber} onChange={handleInputChange} className="w-full p-2 border rounded" placeholder="CID Number" required />
+                    <input type="text" id="contactNumber" value={formData.contactNumber} onChange={handleInputChange} className="w-full p-2 border rounded" placeholder="Contact Number" required />
+                    <input type="email" id="emailAddress" value={formData.emailAddress} onChange={handleInputChange} className="w-full p-2 border rounded" placeholder="Email Address" required />
+                    <input type="text" id="ownershipType" value={formData.ownershipType} onChange={handleInputChange} className="w-full p-2 border rounded" placeholder="Ownership Type" required />
+                    <input type="text" id="coOwners" value={formData.coOwners} onChange={handleInputChange} className="w-full p-2 border rounded" placeholder="Co-Owners (if any)" />
                   </div>
                 </div>
 
                 {/* Submit & Cancel */}
                 <div className="flex justify-end gap-4 mt-4">
-                  <button
-                    type="button"
-                    onClick={toggleModal}
-                    className="bg-gray-400 text-white px-4 py-2 rounded"
-                  >
+                  <button type="button" onClick={toggleModal} className="bg-gray-400 text-white px-4 py-2 rounded">
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    className="bg-[#003366] text-white px-4 py-2 rounded"
-                  >
+                  <button type="submit" className="bg-[#003366] text-white px-4 py-2 rounded">
                     Submit
                   </button>
                 </div>
@@ -475,6 +357,7 @@ const LandRecords = () => {
         {/* Land Records Table */}
         <div className="bg-white shadow-md rounded-lg p-6 overflow-x-auto">
           <div className="flex justify-between items-center w-full">
+
             <h2 className="font-semibold text-lg mb-4">Land Records</h2>
             <div className="relative">
               <input
@@ -498,20 +381,11 @@ const LandRecords = () => {
             <tbody>
               {currentLands.length > 0 ? (
                 currentLands.map((land) => (
-                  <tr
-                    key={land._id}
-                    className="text-center hover:bg-gray-50 transition-colors duration-150"
-                  >
+                  <tr key={land._id} className="text-center hover:bg-gray-50 transition-colors duration-150">
                     <td className="border p-2 text-sm">{land._id}</td>
-                    <td className="border p-2 text-sm text-left">
-                      {land.ownerName}
-                    </td>
-                    <td className="border p-2 text-sm text-left">
-                      {land.location}
-                    </td>
-                    <td className="border p-2 text-sm text-left">
-                      {new Date(land.createdAt).toLocaleDateString()}
-                    </td>
+                    <td className="border p-2 text-sm text-left">{land.ownerName}</td>
+                    <td className="border p-2 text-sm text-left">{land.location}</td>
+                    <td className="border p-2 text-sm text-left">{new Date(land.createdAt).toLocaleDateString()}</td>
                     <td className="border p-2 text-center">
                       <div className="flex justify-center gap-2">
                         <button
@@ -538,9 +412,7 @@ const LandRecords = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="text-center p-2">
-                    No lands available.
-                  </td>
+                  <td colSpan="5" className="text-center p-2">No lands available.</td>
                 </tr>
               )}
             </tbody>
@@ -548,9 +420,7 @@ const LandRecords = () => {
           {/* Pagination */}
           <div className="flex justify-between items-center mt-4">
             <span className="text-sm text-gray-700">
-              Showing {indexOfFirstItem + 1} to{" "}
-              {Math.min(indexOfLastItem, lands.length)} of {lands.length}{" "}
-              entries
+              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, lands.length)} of {lands.length} entries
             </span>
             <div className="flex gap-2">
               <button
@@ -574,16 +444,11 @@ const LandRecords = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-[80%] max-w-4xl h-auto max-h-[80vh] overflow-auto">
               <div className="flex justify-end">
-                <button
-                  onClick={toggleEditModal}
-                  className="text-red-600 text-2xl"
-                >
+                <button onClick={toggleEditModal} className="text-red-600 text-2xl">
                   &times;
                 </button>
               </div>
-              <h2 className="text-2xl font-semibold mb-6 text-center">
-                Edit Land Information
-              </h2>
+              <h2 className="text-2xl font-semibold mb-6 text-center">Edit Land Information</h2>
 
               <form onSubmit={handleUpdateLand}>
                 {/* Land Details Section */}
@@ -690,57 +555,34 @@ const LandRecords = () => {
 
                 {/* Required Documents Section */}
                 <div className="mb-6 p-4 border rounded-lg shadow-sm">
-                  <h3 className="text-xl font-semibold mb-4">
-                    Required Documents
-                  </h3>
+                  <h3 className="text-xl font-semibold mb-4">Required Documents</h3>
                   <p className="text-sm text-gray-600 mb-4">
-                    Document editing/uploading is not available in this modal.
-                    Please manage documents separately.
+                    Document editing/uploading is not available in this modal. Please manage documents separately.
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label
-                        className="block text-gray-700"
-                        htmlFor="ownershipProof"
-                      >
+                      <label className="block text-gray-700" htmlFor="ownershipProof">
                         Ownership Proof
                       </label>
-                      <p className="text-gray-500">
-                        {selectedLand?.ownershipProof || "N/A"}
-                      </p>
+                      <p className="text-gray-500">{selectedLand?.ownershipProof || 'N/A'}</p>
                     </div>
                     <div>
-                      <label
-                        className="block text-gray-700"
-                        htmlFor="thramCopy"
-                      >
+                      <label className="block text-gray-700" htmlFor="thramCopy">
                         Thram Copy
                       </label>
-                      <p className="text-gray-500">
-                        {selectedLand?.thramCopy || "N/A"}
-                      </p>
+                      <p className="text-gray-500">{selectedLand?.thramCopy || 'N/A'}</p>
                     </div>
                     <div>
-                      <label
-                        className="block text-gray-700"
-                        htmlFor="surveyReport"
-                      >
+                      <label className="block text-gray-700" htmlFor="surveyReport">
                         Survey Report
                       </label>
-                      <p className="text-gray-500">
-                        {selectedLand?.surveyReport || "N/A"}
-                      </p>
+                      <p className="text-gray-500">{selectedLand?.surveyReport || 'N/A'}</p>
                     </div>
                     <div>
-                      <label
-                        className="block text-gray-700"
-                        htmlFor="taxClearance"
-                      >
+                      <label className="block text-gray-700" htmlFor="taxClearance">
                         Tax Clearance
                       </label>
-                      <p className="text-gray-500">
-                        {selectedLand?.taxClearance || "N/A"}
-                      </p>
+                      <p className="text-gray-500">{selectedLand?.taxClearance || 'N/A'}</p>
                     </div>
                   </div>
                 </div>
@@ -762,6 +604,7 @@ const LandRecords = () => {
                   </button>
                 </div>
               </form>
+
             </div>
           </div>
         )}
@@ -770,89 +613,43 @@ const LandRecords = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-[80%] max-w-4xl h-auto max-h-[80vh] overflow-auto">
               <div className="flex justify-end">
-                <button
-                  onClick={toggleViewModal}
-                  className="text-red-600 text-2xl"
-                >
+                <button onClick={toggleViewModal} className="text-red-600 text-2xl">
                   &times;
                 </button>
               </div>
               <div className="bg-white rounded-lg">
-                <h2 className="text-2xl font-semibold text-[#142854] text-center mb-6">
-                  Land Details
-                </h2>
+                <h2 className="text-2xl font-semibold text-[#142854] text-center mb-6">Land Details</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border rounded-lg p-6 bg-white">
                   <div className="space-y-6">
                     <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
-                      <h3 className="text-lg mt-1 font-semibold text-[#142854] mb-3">
-                        Basic Information
-                      </h3>
-                      <p className="text-sm mt-1">
-                        <strong>Land ID:</strong> {currentLand.id}
-                      </p>
-                      <p className="text-sm mt-1">
-                        <strong>Owner:</strong> {currentLand.owner}
-                      </p>
-                      <p className="text-sm mt-1">
-                        <strong>Location:</strong> {currentLand.location}
-                      </p>
-                      <p className="text-sm mt-1">
-                        <strong>Date:</strong> {currentLand.date}
-                      </p>
+                      <h3 className="text-lg mt-1 font-semibold text-[#142854] mb-3">Basic Information</h3>
+                      <p className="text-sm mt-1"><strong>Land ID:</strong> {currentLand.id}</p>
+                      <p className="text-sm mt-1"><strong>Owner:</strong> {currentLand.owner}</p>
+                      <p className="text-sm mt-1"><strong>Location:</strong> {currentLand.location}</p>
+                      <p className="text-sm mt-1"><strong>Date:</strong> {currentLand.date}</p>
                     </div>
                     <div className="bg-gray-50  p-4 rounded-lg shadow-sm">
-                      <h3 className="text-lg mt-1 font-semibold text-[#142854] mb-3">
-                        Owner Details
-                      </h3>
-                      <p className="text-sm mt-1">
-                        <strong>Owner Name:</strong>{" "}
-                        {currentLand.landDetails.ownerName}
-                      </p>
-                      <p className="text-sm mt-1">
-                        <strong>CID Number:</strong>{" "}
-                        {currentLand.landDetails.cidNumber}
-                      </p>
-                      <p className="text-sm mt-1">
-                        <strong>Contact Number:</strong>{" "}
-                        {currentLand.landDetails.contactNumber}
-                      </p>
-                      <p className="text-sm mt-1">
-                        <strong>Email Address:</strong>{" "}
-                        {currentLand.landDetails.emailAddress}
-                      </p>
-                      <p className="text-sm mt-1">
-                        <strong>Ownership Type:</strong>{" "}
-                        {currentLand.landDetails.ownershipType}
-                      </p>
-                      <p className="text-sm mt-1">
-                        <strong>Co-Owners:</strong>{" "}
-                        {currentLand.landDetails.coOwners}
-                      </p>
+                      <h3 className="text-lg mt-1 font-semibold text-[#142854] mb-3">Owner Details</h3>
+                      <p className="text-sm mt-1"><strong>Owner Name:</strong> {currentLand.landDetails.ownerName}</p>
+                      <p className="text-sm mt-1"><strong>CID Number:</strong> {currentLand.landDetails.cidNumber}</p>
+                      <p className="text-sm mt-1"><strong>Contact Number:</strong> {currentLand.landDetails.contactNumber}</p>
+                      <p className="text-sm mt-1"><strong>Email Address:</strong> {currentLand.landDetails.emailAddress}</p>
+                      <p className="text-sm mt-1"><strong>Ownership Type:</strong> {currentLand.landDetails.ownershipType}</p>
+                      <p className="text-sm mt-1"><strong>Co-Owners:</strong> {currentLand.landDetails.coOwners}</p>
                     </div>
+
                   </div>
 
                   <div className="space-y-6">
+
                     <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
-                      <h3 className="text-lg font-semibold text-[#142854] mb-3">
-                        Land Details
-                      </h3>
-                      <p className="text-sm mt-1">
-                        <strong>Land Type:</strong>{" "}
-                        {currentLand.landDetails.landType}
-                      </p>
-                      <p className="text-sm mt-1">
-                        <strong>Land Size:</strong>{" "}
-                        {currentLand.landDetails.landSize}
-                      </p>
-                      <p className="text-sm mt-1">
-                        <strong>Boundary Details:</strong>{" "}
-                        {currentLand.landDetails.boundaryDetails}
-                      </p>
+                      <h3 className="text-lg font-semibold text-[#142854] mb-3">Land Details</h3>
+                      <p className="text-sm mt-1"><strong>Land Type:</strong> {currentLand.landDetails.landType}</p>
+                      <p className="text-sm mt-1"><strong>Land Size:</strong> {currentLand.landDetails.landSize}</p>
+                      <p className="text-sm mt-1"><strong>Boundary Details:</strong> {currentLand.landDetails.boundaryDetails}</p>
                     </div>
                     <div className="bg-gray-50  p-4 rounded-lg shadow-sm mt-6">
-                      <h3 className="text-lg font-semibold text-[#142854] mb-3">
-                        Documents
-                      </h3>
+                      <h3 className="text-lg font-semibold text-[#142854] mb-3">Documents</h3>
                       <div className="bg-gray-100 mb-2 rounded-lg p-2 border">
                         <a
                           // href={selectedTransaction.documentUrl}
@@ -906,9 +703,11 @@ const LandRecords = () => {
                         </a>
                       </div>
                     </div>
+
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         )}
@@ -917,3 +716,6 @@ const LandRecords = () => {
   );
 };
 export default LandRecords;
+
+
+

@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerUser } from "../../../backend/services/authService"; // Assuming you have a registerUser function
+import { registerUser } from "../services/authService"; // Assuming you have a registerUser function
 import logo from "../assets/images/logo.png"; // Updated path to your Tera logo
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"; // Importing icons from Heroicons v2
+
+
+
+
 
 const Register = () => {
   const [cid, setCid] = useState("");
@@ -56,10 +60,7 @@ const Register = () => {
       setSuccessMessage("Registration successful! You can now log in.");
       setTimeout(() => navigate("/login"), 3000); // Redirect to login after success
     } catch (err) {
-      setError(
-        err.message ||
-          "An error occurred during registration. Please try again."
-      );
+      setError(err.message || "An error occurred during registration. Please try again.");
     }
   };
 
@@ -74,20 +75,12 @@ const Register = () => {
       <div className="w-full md:w-2/3 flex flex-col justify-center items-center bg-[#F8F8F8] p-8 sm:p-16">
         <h2 className="text-3xl font-bold text-[#1A2A48] mb-6">Sign Up</h2>
 
-        {error && (
-          <p className="text-red-500 text-sm text-center mb-4">{error}</p>
-        )}
-        {successMessage && (
-          <p className="text-green-500 text-sm text-center mb-4">
-            {successMessage}
-          </p>
-        )}
+        {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
+        {successMessage && <p className="text-green-500 text-sm text-center mb-4">{successMessage}</p>}
 
         <form onSubmit={handleRegister} className="w-full sm:w-96 space-y-6">
           <div>
-            <label className="block text-sm font-medium text-[#1A2A48]">
-              CID Number
-            </label>
+            <label className="block text-sm font-medium text-[#1A2A48]">CID Number</label>
             <input
               type="text"
               value={cid}
@@ -99,9 +92,7 @@ const Register = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A2A48]">
-              Email
-            </label>
+            <label className="block text-sm font-medium text-[#1A2A48]">Email</label>
             <input
               type="email"
               value={email}
@@ -113,9 +104,7 @@ const Register = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A2A48]">
-              Phone Number
-            </label>
+            <label className="block text-sm font-medium text-[#1A2A48]">Phone Number</label>
             <input
               type="text"
               value={phone}
@@ -127,9 +116,7 @@ const Register = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A2A48]">
-              Password
-            </label>
+            <label className="block text-sm font-medium text-[#1A2A48]">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -154,9 +141,7 @@ const Register = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A2A48]">
-              Confirm Password
-            </label>
+            <label className="block text-sm font-medium text-[#1A2A48]">Confirm Password</label>
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -189,7 +174,10 @@ const Register = () => {
 
           <div className="flex justify-center mt-4 text-sm">
             <p>Already have an account?</p>
-            <a href="/login" className="text-[#1A2A48] hover:underline ml-1">
+            <a
+              href="/login"
+              className="text-[#1A2A48] hover:underline ml-1"
+            >
               Login
             </a>
           </div>

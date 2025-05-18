@@ -1,6 +1,6 @@
 import Sidebar from "./SidebarNavigation";
 import { useState, useEffect } from "react";
-import { Outlet, useNavigate, useLocation, Navigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation, Navigate } from "react-router-dom"; // ✅ Added Navigate
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "../pages/Dashboard";
 import LandRecords from "../pages/LandRecords";
@@ -10,7 +10,9 @@ import Home from "../pages/User/Home";
 import BuyLand from "../pages/User/BuyLand";
 import SellLand from "../pages/User/SellLand";
 import TransferOwnership from "../pages/User/TransferOwnership";
+import DisputeLand from "../pages/User/DisputeLand";
 import VerifyOwnership from "../pages/VerifyOwnership";
+import UserProfile from "../pages/User/UserProfile";
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -123,6 +125,12 @@ const Layout = ({ children }) => {
                     path="/transfer-ownership"
                     element={<TransferOwnership />}
                   />
+                )}
+                {!isGovernmentUser && (
+                  <Route path="/Dispute-Land" element={<DisputeLand />} />
+                )}
+                {!isGovernmentUser && (
+                  <Route path="/user-profile" element={<UserProfile />} />
                 )}
               </Routes>
             </div>

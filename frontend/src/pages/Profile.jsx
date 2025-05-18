@@ -1,12 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { FiSearch, FiLogOut, FiUser, FiMenu } from "react-icons/fi";
-import {
-  MdDashboard,
-  MdOutlineHome,
-  MdOutlineGavel,
-  MdOutlineTransferWithinAStation,
-} from "react-icons/md";
+import { MdDashboard, MdOutlineHome, MdOutlineGavel, MdOutlineTransferWithinAStation } from "react-icons/md";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -101,9 +96,7 @@ const Profile = () => {
             >
               <FiMenu className="text-2xl" />
             </button>
-            <h1 className="text-xl sm:text-3xl font-semibold text-gray-800">
-              Profile
-            </h1>
+            <h1 className="text-xl sm:text-3xl font-semibold text-gray-800">Profile</h1>
           </div>
           <div className="flex items-center space-x-4">
             <div className="relative">
@@ -163,9 +156,7 @@ const Profile = () => {
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="w-full sm:w-1/3">
-                  <label className="block font-medium text-gray-700">
-                    Username
-                  </label>
+                  <label className="block font-medium text-gray-700">Username</label>
                   <input
                     type="text"
                     placeholder="JohnDoe"
@@ -173,9 +164,7 @@ const Profile = () => {
                   />
                 </div>
                 <div className="w-full sm:w-1/3">
-                  <label className="block font-medium text-gray-700">
-                    Email
-                  </label>
+                  <label className="block font-medium text-gray-700">Email</label>
                   <input
                     type="email"
                     placeholder="johndoe@example.com"
@@ -183,9 +172,7 @@ const Profile = () => {
                   />
                 </div>
                 <div className="w-full sm:w-1/3">
-                  <label className="block font-medium text-gray-700">
-                    Phone Number
-                  </label>
+                  <label className="block font-medium text-gray-700">Phone Number</label>
                   <input
                     type="text"
                     placeholder="+1 234 567 890"
@@ -195,9 +182,7 @@ const Profile = () => {
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="w-full sm:w-1/3">
-                  <label className="block font-medium text-gray-700">
-                    Address
-                  </label>
+                  <label className="block font-medium text-gray-700">Address</label>
                   <input
                     type="text"
                     placeholder="123 Main St"
@@ -205,18 +190,14 @@ const Profile = () => {
                   />
                 </div>
                 <div className="w-full sm:w-1/3">
-                  <label className="block font-medium text-gray-700">
-                    Date of Birth
-                  </label>
+                  <label className="block font-medium text-gray-700">Date of Birth</label>
                   <input
                     type="date"
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div className="w-full sm:w-1/3">
-                  <label className="block font-medium text-gray-700">
-                    Gender
-                  </label>
+                  <label className="block font-medium text-gray-700">Gender</label>
                   <select className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option>Male</option>
                     <option>Female</option>
@@ -233,27 +214,21 @@ const Profile = () => {
           <h2 className="font-semibold text-lg mb-4">Change Password</h2>
           <div className="space-y-4">
             <div className="w-full">
-              <label className="block font-medium text-gray-700">
-                Current Password
-              </label>
+              <label className="block font-medium text-gray-700">Current Password</label>
               <input
                 type="password"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="w-full">
-              <label className="block font-medium text-gray-700">
-                New Password
-              </label>
+              <label className="block font-medium text-gray-700">New Password</label>
               <input
                 type="password"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="w-full">
-              <label className="block font-medium text-gray-700">
-                Confirm Password
-              </label>
+              <label className="block font-medium text-gray-700">Confirm Password</label>
               <input
                 type="password"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
