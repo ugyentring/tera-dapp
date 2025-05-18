@@ -20,9 +20,21 @@ export const loginUser = async (email, password) => {
 };
 
 // Register User
-export const registerUser = async (cid, email, phone, password, confirmPassword) => {
+export const registerUser = async (
+  cid,
+  email,
+  phone,
+  password,
+  confirmPassword
+) => {
   try {
-    console.log('Registering with data:', { cid, email, phone, password, confirmPassword });
+    console.log("Registering with data:", {
+      cid,
+      email,
+      phone,
+      password,
+      confirmPassword,
+    });
     const response = await axios.post(
       `${API_URL}auth/register`,
       { cid, email, phone, password, confirmPassword },
@@ -43,37 +55,37 @@ export const registerLand = async (formData) => {
     const data = new FormData();
 
     // Append form fields
-    data.append('landType', formData.landType);
-    data.append('location', formData.location);
-    data.append('landSize', formData.landSize);
-    data.append('boundaryDetails', formData.boundaryDetails);
-    data.append('ownerName', formData.ownerName);
-    data.append('cidNumber', formData.cidNumber);
-    data.append('contactNumber', formData.contactNumber);
-    data.append('emailAddress', formData.emailAddress);
-    data.append('ownershipType', formData.ownershipType);
-    data.append('coOwners', formData.coOwners);
+    data.append("landType", formData.landType);
+    data.append("location", formData.location);
+    data.append("landSize", formData.landSize);
+    data.append("boundaryDetails", formData.boundaryDetails);
+    data.append("ownerName", formData.ownerName);
+    data.append("cidNumber", formData.cidNumber);
+    data.append("contactNumber", formData.contactNumber);
+    data.append("emailAddress", formData.emailAddress);
+    data.append("ownershipType", formData.ownershipType);
+    data.append("coOwners", formData.coOwners);
 
     // Append uploaded files
     if (formData.ownershipProof) {
-      data.append('ownershipProof', formData.ownershipProof);
+      data.append("ownershipProof", formData.ownershipProof);
     }
     if (formData.thramCopy) {
-      data.append('thramCopy', formData.thramCopy);
+      data.append("thramCopy", formData.thramCopy);
     }
     if (formData.surveyReport) {
-      data.append('surveyReport', formData.surveyReport);
+      data.append("surveyReport", formData.surveyReport);
     }
     if (formData.taxClearance) {
-      data.append('taxClearance', formData.taxClearance);
+      data.append("taxClearance", formData.taxClearance);
     }
 
     const response = await axios.post(
-      `${API_URL}auth/govtland/register`,   // Ensure this is the correct endpoint for land registration
+      `${API_URL}auth/govtland/register`, // Ensure this is the correct endpoint for land registration
       data,
       {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
         withCredentials: true,
       }
@@ -81,20 +93,19 @@ export const registerLand = async (formData) => {
 
     return response.data;
   } catch (error) {
-    console.error("Land Registration Error:", error.response.data || error.message);
+    console.error(
+      "Land Registration Error:",
+      error.response.data || error.message
+    );
     throw error.response?.data?.message || "Land registration failed";
   }
-
 };
 export const getGovtLands = async () => {
   try {
-    const response = await axios.get(
-      `${API_URL}auth/govtland`,
-      {
-        withCredentials: true,
-      }
-    );
-    return response.data; // Should be the array of land records
+    const response = await axios.get(`${API_URL}auth/govtland`, {
+      withCredentials: true,
+    });
+    return response.data.data; // Return the array of land records
   } catch (error) {
     throw error.response?.data || "Fetching government lands failed";
   }

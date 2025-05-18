@@ -1,13 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import {
-  FiUser,
-  FiMenu,
-  FiCheckCircle,
-  FiX,
-  FiUpload,
-  FiEdit,
-} from "react-icons/fi";
+import { FiUser, FiMenu, FiCheckCircle, FiX, FiUpload, FiEdit } from "react-icons/fi";
 
 function UserProfile() {
   const navigate = useNavigate();
@@ -71,10 +64,8 @@ function UserProfile() {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.firstName?.trim())
-      newErrors.firstName = "First name is required.";
-    if (!formData.lastName?.trim())
-      newErrors.lastName = "Last name is required.";
+    if (!formData.firstName?.trim()) newErrors.firstName = "First name is required.";
+    if (!formData.lastName?.trim()) newErrors.lastName = "Last name is required.";
     if (!formData.email?.trim()) {
       newErrors.email = "Email is required.";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -136,12 +127,7 @@ function UserProfile() {
   const fields = [
     { label: "First Name", name: "firstName", placeholder: "First Name" },
     { label: "Last Name", name: "lastName", placeholder: "Last Name" },
-    {
-      label: "Email",
-      name: "email",
-      placeholder: "you@example.com",
-      type: "email",
-    },
+    { label: "Email", name: "email", placeholder: "you@example.com", type: "email" },
     { label: "Phone Number", name: "phone", placeholder: "(+975) 551-2345" },
     { label: "Date of Birth", name: "dob", type: "date" },
     { label: "CID", name: "cid", placeholder: "Citizen ID Number" },
@@ -173,9 +159,7 @@ function UserProfile() {
             <button onClick={toggleSidebarMobile} className="lg:hidden">
               <FiMenu className="text-2xl text-gray-700" />
             </button>
-            <h1 className="text-lg font-semibold text-gray-800">
-              User Profile
-            </h1>
+            <h1 className="text-lg font-semibold text-gray-800">User Profile</h1>
           </div>
           <div className="relative">
             <FiUser
@@ -242,7 +226,7 @@ function UserProfile() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6 mb-10">
             {fields.map(({ label, name, placeholder, type }) => (
               <div key={name}>
-                <label className="text-gray-800 font-semibold mb-2.5 flex items-center gap-2">
+                <label className="block text-gray-800 font-semibold mb-2.5 flex items-center gap-2">
                   {label}
                   <FiEdit
                     className="text-gray-500 text-sm cursor-pointer hover:text-[#003366]"
@@ -272,7 +256,7 @@ function UserProfile() {
 
           {/* Bio Section */}
           <div className="mb-10">
-            <label className=" text-gray-800 font-semibold mb-2.5 flex items-center gap-2">
+            <label className="block text-gray-800 font-semibold mb-2.5 flex items-center gap-2">
               Bio
               <FiEdit
                 className="text-gray-500 text-sm cursor-pointer hover:text-[#003366]"
@@ -298,7 +282,7 @@ function UserProfile() {
           {/* Password Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6 mb-10">
             <div>
-              <label className=" text-gray-800 font-semibold mb-2.5 flex items-center gap-2">
+              <label className="block text-gray-800 font-semibold mb-2.5 flex items-center gap-2">
                 New Password
                 <FiEdit
                   className="text-gray-500 text-sm cursor-pointer hover:text-[#003366]"
@@ -325,7 +309,7 @@ function UserProfile() {
             </div>
 
             <div>
-              <label className=" text-gray-800 font-semibold mb-2.5 flex items-center gap-2">
+              <label className="block text-gray-800 font-semibold mb-2.5 flex items-center gap-2">
                 Confirm Password
                 <FiEdit
                   className="text-gray-500 text-sm cursor-pointer hover:text-[#003366]"
@@ -347,9 +331,7 @@ function UserProfile() {
                 onBlur={() => disableEdit("confirmPassword")}
               />
               {errors.confirmPassword && (
-                <p className="text-sm text-red-500 mt-1">
-                  {errors.confirmPassword}
-                </p>
+                <p className="text-sm text-red-500 mt-1">{errors.confirmPassword}</p>
               )}
             </div>
           </div>

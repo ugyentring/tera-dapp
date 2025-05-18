@@ -5,6 +5,7 @@ import {
   registerGovtLand,
   getAllGovtLand,
   getGovtLandById,
+  deleteGovtLandById,
 } from "../controllers/govtLandController.js";
 import upload from "../middleware/govtUpload.js";
 
@@ -33,5 +34,8 @@ router.get("/govtland", getAllGovtLand);
 
 // Route to GET a specific government land record by ID
 router.get("/govtland/:id", getGovtLandById);
+
+// Route to DELETE a specific government land record by ID
+router.delete("/govtland/:id", deleteGovtLandById);
 
 export default router;
