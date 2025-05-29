@@ -22,7 +22,7 @@ import {
   MdGavel,
   MdHourglassEmpty,
 } from "react-icons/md";
-import { AiOutlineDownload } from "react-icons/ai"; // For download icon
+import { AiOutlineDownload } from "react-icons/ai";
 import { AiOutlineEye } from "react-icons/ai";
 import { getGovtLands } from "../services/authService";
 
@@ -54,7 +54,7 @@ const Dashboard = () => {
         const mappedTransactions = data.map((land) => ({
           landId: land.id,
           date: land.date,
-          status: land.status || "N/A", // Default to "N/A" if status is missing
+          status: land.status || "N/A",
           owner: land.owner,
           location: land.location,
           landType: land.landType,
@@ -293,7 +293,6 @@ const Dashboard = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4">
                 {/* Buyer and Seller Info */}
                 <div className="bg-gray-50 p-4 rounded-lg shadow">
-                  {/* <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3">Buyer and Seller Information</h3> */}
                   <div className="pb-3">
                     <div className="space-y-2">
                       <h4 className="font-semibold text-bold text-[#142854]">
