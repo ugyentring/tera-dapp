@@ -48,8 +48,19 @@ const Dashboard = () => {
     const fetchTransactions = async () => {
       try {
         const data = await getGovtLands();
-        console.log("API Response:", data); // Log the API response
-        setAllTransactions(Array.isArray(data) ? data : []); // Ensure data is an array
+        console.log("API Response:", data);
+
+        // Map backend data to include required fields
+        const mappedTransactions = data.map((land) => ({
+          landId: land.id,
+          date: land.date,
+          status: land.status || "N/A", // Default to "N/A" if status is missing
+          owner: land.owner,
+          location: land.location,
+          landType: land.landType,
+        }));
+
+        setAllTransactions(mappedTransactions);
       } catch (error) {
         console.error("Error fetching transactions:", error);
       }
@@ -658,7 +669,7 @@ const Dashboard = () => {
                     {txn.owner}
                   </td>
                   <td className="py-3 px-4 border-b border-gray-200 text-sm">
-                    {txn.land}
+                    {txn.landId}
                   </td>
                   <td className="py-3 px-4 border-b border-gray-200 text-sm">
                     {txn.date}
@@ -673,7 +684,7 @@ const Dashboard = () => {
                         ? "text-yellow-500"
                         : txn.status?.toLowerCase() === "rejected"
                         ? "text-red-600"
-                        : "text-gray-500" // Default color
+                        : "text-gray-500"
                     }`}
                     >
                       {txn.status}

@@ -207,7 +207,7 @@ const LandRecords = () => {
     e.preventDefault();
 
     try {
-      const result = await registerLand(formData); // Send JSON directly
+      const result = await registerLand(formData);
       console.log("Land registered successfully:", result);
       Swal.fire({
         icon: "success",
@@ -232,7 +232,7 @@ const LandRecords = () => {
         coOwners: "",
       });
 
-      toggleModal(); // Optional: close modal after success
+      toggleModal();
     } catch (error) {
       console.error("Error submitting land registration:", error);
 
@@ -540,7 +540,7 @@ const LandRecords = () => {
                       {land.owner}
                     </td>
                     <td className="border p-2 text-sm text-left">
-                      {land.land}
+                      {land.location}
                     </td>
                     <td className="border p-2 text-sm text-left">
                       {new Date().toLocaleDateString()}{" "}
