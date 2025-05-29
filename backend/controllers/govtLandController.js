@@ -17,6 +17,7 @@ const govtLandSchema = new mongoose.Schema({
   surveyReport: { type: String },
   taxClearance: { type: String },
   registrationDate: { type: Date, default: Date.now },
+  thramNumber: { type: String, required: true }, // Bhutanese thram number, e.g., '179'
 });
 
 // Create the GovtLand model
@@ -40,6 +41,7 @@ export const registerGovtLand = async (req, res) => {
       emailAddress: body.emailAddress,
       ownershipType: body.ownershipType,
       coOwners: body.coOwners,
+      thramNumber: body.thramNumber, // Add thram number from request
       ownershipProof: "",
       thramCopy: "",
       surveyReport: "",
@@ -75,6 +77,7 @@ export const registerLand = async (req, res) => {
       emailAddress,
       ownershipType,
       coOwners,
+      thramNumber, // Add thram number from request
     } = req.body;
 
     // Create a new land record
@@ -89,6 +92,7 @@ export const registerLand = async (req, res) => {
       emailAddress,
       ownershipType,
       coOwners,
+      thramNumber, // Add thram number from request
     });
 
     await newLand.save();
@@ -120,6 +124,7 @@ export const getAllGovtLand = async (req, res) => {
       emailAddress: land.emailAddress,
       ownershipType: land.ownershipType,
       coOwners: land.coOwners,
+      thramNumber: land.thramNumber, // Add thram number to response
       ownershipProof: land.ownershipProof,
       thramCopy: land.thramCopy,
       surveyReport: land.surveyReport,
@@ -144,6 +149,12 @@ export const getAllGovtLand = async (req, res) => {
 export const getGovtLandById = async (req, res) => {
   try {
     const id = req.params.id; // Get the ID from the request parameters
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+
     const govtLand = await GovtLand.findById(id); // Find by ID
 
     if (!govtLand) {
@@ -184,5 +195,15 @@ export const deleteGovtLandById = async (req, res) => {
       message: "Failed to delete Govt Land record",
       error: error.message,
     });
+  }
+};
+
+// Fetch all land records
+export const getAllLandRecords = async (req, res) => {
+  try {
+    const landRecords = await GovtLand.find();
+    res.status(200).json(landRecords);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch land records" });
   }
 };

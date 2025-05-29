@@ -5,6 +5,7 @@ import bodyParser from "body-parser";
 import connectDB from "./config/db.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import govtLandRoutes from "./routes/govtLandRoutes.js"; // Corrected import for govtLandRoutes
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Routes
 app.use("/api/contact", contactRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/govtland", govtLandRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

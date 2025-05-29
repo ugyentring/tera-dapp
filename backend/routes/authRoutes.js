@@ -6,6 +6,7 @@ import {
   getAllGovtLand,
   getGovtLandById,
   deleteGovtLandById,
+  getAllLandRecords,
 } from "../controllers/govtLandController.js";
 import { getAllTransactions } from "../controllers/transactionController.js";
 import upload from "../middleware/govtUpload.js";
@@ -41,5 +42,8 @@ router.delete("/govtland/:id", deleteGovtLandById);
 
 // Add route for fetching transactions
 router.get("/transactions", getAllTransactions);
+
+// Add route for fetching land records
+router.get("/land-records", getAllLandRecords);
 
 export default router;
