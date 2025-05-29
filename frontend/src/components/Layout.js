@@ -1,6 +1,6 @@
 import Sidebar from "./SidebarNavigation";
 import { useState, useEffect } from "react";
-import { Outlet, useNavigate, useLocation, Navigate } from "react-router-dom"; // ✅ Added Navigate
+import { Outlet, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { Routes, Route } from 'react-router-dom';
 import Dashboard from "../pages/Dashboard";
 import LandRecords from "../pages/LandRecords";
@@ -34,7 +34,7 @@ const Layout = ({ children }) => {
 
     const handleLogout = () => {
         localStorage.removeItem("token");
-        localStorage.removeItem("userEmail"); // Clear user email on logout
+        localStorage.removeItem("userEmail");
         navigate("/");
     };
 

@@ -4,10 +4,10 @@ import path from "path";
 // Set up multer storage options
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./uploads/"); // or wherever you want to save the uploaded files
+    cb(null, "./uploads/");
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
