@@ -17,7 +17,7 @@ const govtLandSchema = new mongoose.Schema({
   surveyReport: { type: String },
   taxClearance: { type: String },
   registrationDate: { type: Date, default: Date.now },
-  thramNumber: { type: String, required: true }, // Bhutanese thram number, e.g., '179'
+  thramNumber: { type: String, required: true },
 });
 
 // Create the GovtLand model
@@ -41,7 +41,7 @@ export const registerGovtLand = async (req, res) => {
       emailAddress: body.emailAddress,
       ownershipType: body.ownershipType,
       coOwners: body.coOwners,
-      thramNumber: body.thramNumber, // Add thram number from request
+      thramNumber: body.thramNumber,
       ownershipProof: "",
       thramCopy: "",
       surveyReport: "",
@@ -77,7 +77,7 @@ export const registerLand = async (req, res) => {
       emailAddress,
       ownershipType,
       coOwners,
-      thramNumber, // Add thram number from request
+      thramNumber,
     } = req.body;
 
     // Create a new land record
@@ -92,7 +92,7 @@ export const registerLand = async (req, res) => {
       emailAddress,
       ownershipType,
       coOwners,
-      thramNumber, // Add thram number from request
+      thramNumber,
     });
 
     await newLand.save();
@@ -109,7 +109,7 @@ export const registerLand = async (req, res) => {
 // Function to fetch all GovtLand records
 export const getAllGovtLand = async (req, res) => {
   try {
-    const govtLands = await GovtLand.find({}); // Fetch all documents
+    const govtLands = await GovtLand.find({});
 
     // Transform data to match frontend expectations
     const transformedLands = govtLands.map((land) => ({
@@ -124,12 +124,12 @@ export const getAllGovtLand = async (req, res) => {
       emailAddress: land.emailAddress,
       ownershipType: land.ownershipType,
       coOwners: land.coOwners,
-      thramNumber: land.thramNumber, // Add thram number to response
+      thramNumber: land.thramNumber,
       ownershipProof: land.ownershipProof,
       thramCopy: land.thramCopy,
       surveyReport: land.surveyReport,
       taxClearance: land.taxClearance,
-      date: land.createdAt,
+      date: land.registrationDate,
     }));
 
     res.status(200).json({
@@ -148,14 +148,14 @@ export const getAllGovtLand = async (req, res) => {
 // Function to fetch a single GovtLand record by ID
 export const getGovtLandById = async (req, res) => {
   try {
-    const id = req.params.id; // Get the ID from the request parameters
+    const id = req.params.id;
 
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid ID format" });
     }
 
-    const govtLand = await GovtLand.findById(id); // Find by ID
+    const govtLand = await GovtLand.findById(id);
 
     if (!govtLand) {
       return res.status(404).json({ message: "Govt Land record not found" });
@@ -177,9 +177,9 @@ export const getGovtLandById = async (req, res) => {
 // Function to delete a GovtLand record by ID
 export const deleteGovtLandById = async (req, res) => {
   try {
-    const id = req.params.id; // Get the ID from the request parameters
+    const id = req.params.id;
 
-    const deletedLand = await GovtLand.findByIdAndDelete(id); // Delete the record by ID
+    const deletedLand = await GovtLand.findByIdAndDelete(id);
 
     if (!deletedLand) {
       return res.status(404).json({ message: "Govt Land record not found" });
@@ -193,6 +193,38 @@ export const deleteGovtLandById = async (req, res) => {
     console.error("Error deleting Govt Land record by ID:", error);
     res.status(500).json({
       message: "Failed to delete Govt Land record",
+      error: error.message,
+    });
+  }
+};
+
+// PATCH: Update a GovtLand record by ID (partial update)
+export const updateGovtLandById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+    const updateFields = req.body;
+    // Remove fields that should not be updated directly (if any)
+    delete updateFields._id;
+    delete updateFields.id;
+    // Update the record
+    const updatedLand = await GovtLand.findByIdAndUpdate(id, updateFields, {
+      new: true,
+      runValidators: true,
+    });
+    if (!updatedLand) {
+      return res.status(404).json({ message: "Govt Land record not found" });
+    }
+    res.status(200).json({
+      message: "Govt Land record updated successfully",
+      data: updatedLand,
+    });
+  } catch (error) {
+    console.error("Error updating Govt Land record by ID:", error);
+    res.status(500).json({
+      message: "Failed to update Govt Land record",
       error: error.message,
     });
   }

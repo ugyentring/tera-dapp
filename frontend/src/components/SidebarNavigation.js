@@ -117,10 +117,16 @@ const Sidebar = () => {
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        setUserEmail(parsedUser.email);
+        if (parsedUser && parsedUser.email) {
+          setUserEmail(parsedUser.email);
+        } else {
+          console.warn("User data is missing email property.");
+        }
       } catch (error) {
         console.error("Error parsing user data from local storage:", error);
       }
+    } else {
+      console.warn("No user data found in local storage.");
     }
   }, []);
   useEffect(() => {

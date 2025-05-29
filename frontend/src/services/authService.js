@@ -65,6 +65,7 @@ export const registerLand = async (formData) => {
     data.append("emailAddress", formData.emailAddress);
     data.append("ownershipType", formData.ownershipType);
     data.append("coOwners", formData.coOwners);
+    data.append("thramNumber", formData.thramNumber); // Ensure thramNumber is sent
 
     // Append uploaded files
     if (formData.ownershipProof) {

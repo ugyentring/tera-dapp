@@ -22,7 +22,6 @@ import {
 } from "react-icons/md";
 import { AiOutlineEye, AiOutlineDownload } from "react-icons/ai"; // For download icon
 import Swal from "sweetalert2";
-import logo from "../assets/images/logo.png";
 import { registerLand, getGovtLands } from "../services/authService";
 
 const LandRecords = () => {
@@ -58,10 +57,12 @@ const LandRecords = () => {
     emailAddress: "",
     ownershipType: "",
     coOwners: "",
-    ownershipProof: "", // Assuming you want to display existing names
+    thramNumber: "", // Add thram number to edit form
+    ownershipProof: "",
     thramCopy: "",
     surveyReport: "",
     taxClearance: "",
+    date: "", // Add date to edit form
   });
   const [formData, setFormData] = useState({
     landType: "",
@@ -74,6 +75,7 @@ const LandRecords = () => {
     emailAddress: "",
     ownershipType: "",
     coOwners: "",
+    thramNumber: "", // Add thram number to registration form
   });
   useEffect(() => {
     const fetchLands = async () => {
@@ -96,7 +98,7 @@ const LandRecords = () => {
     setSelectedLand(land); // Store the selected land
     setEditFormData({
       id: land.id || "",
-      owner: land.owner || "",
+      ownerName: land.ownerName || land.owner || "",
       landType: land.landType || "",
       location: land.location || "", // Corrected to match the backend field
       landSize: land.landSize || "",
@@ -106,20 +108,12 @@ const LandRecords = () => {
       emailAddress: land.emailAddress || "",
       ownershipType: land.ownershipType || "",
       coOwners: land.coOwners || "",
-    });
-    console.log("Selected Land:", land);
-    console.log("Mapped Edit Form Data:", {
-      id: land.id || "",
-      owner: land.owner || "",
-      landType: land.landType || "",
-      location: land.location || "",
-      landSize: land.landSize || "",
-      boundaryDetails: land.boundaryDetails || "",
-      cidNumber: land.cidNumber || "",
-      contactNumber: land.contactNumber || "",
-      emailAddress: land.emailAddress || "",
-      ownershipType: land.ownershipType || "",
-      coOwners: land.coOwners || "",
+      thramNumber: land.thramNumber || "", // Add thram number
+      date: land.registrationDate
+        ? land.registrationDate.split("T")[0]
+        : land.date
+        ? land.date.split("T")[0]
+        : "", // ISO date string for input
     });
     setIsEditModalOpen(true); // Open the edit modal
   };
@@ -137,11 +131,63 @@ const LandRecords = () => {
     setSelectedLand(null);
   };
 
-  const handleUpdateLand = (e) => {
+  const handleUpdateLand = async (e) => {
     e.preventDefault();
-    console.log("Updating land with:", editFormData);
-    setIsEditModalOpen(false);
-    setSelectedLand(null);
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL;
+      // Only send fields that have changed (partial update)
+      const payload = {};
+      Object.keys(editFormData).forEach((key) => {
+        if (
+          editFormData[key] !== undefined &&
+          editFormData[key] !== null &&
+          editFormData[key] !== ""
+        ) {
+          payload[key] = editFormData[key];
+        }
+      });
+      // Map ownerName if needed
+      if (payload.owner) {
+        payload.ownerName = payload.owner;
+        delete payload.owner;
+      }
+      if (payload.date) {
+        payload.registrationDate = payload.date;
+        delete payload.date;
+      }
+      const response = await fetch(`${apiUrl}/govtLand/${editFormData.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      if (response.ok) {
+        const result = await response.json();
+        const updatedLand = result.data || result;
+        setLands((prevLands) =>
+          prevLands.map((land) =>
+            land.id === updatedLand._id ||
+            land.id === updatedLand.id ||
+            land._id === updatedLand._id
+              ? {
+                  ...land,
+                  ...updatedLand,
+                  id: updatedLand._id || updatedLand.id,
+                }
+              : land
+          )
+        );
+        setIsEditModalOpen(false);
+        setSelectedLand(null);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update land record");
+      }
+    } catch (error) {
+      console.error("Error updating land record:", error);
+      // Optionally show error to user
+    }
   };
   const handleEditInputChange = (e) => {
     const { id, value } = e.target;
@@ -205,9 +251,12 @@ const LandRecords = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const result = await registerLand(formData);
+      const result = await registerLand({
+        ...formData,
+        ownerName: formData.ownerName, // ensure ownerName is sent
+        thramNumber: formData.thramNumber, // ensure thramNumber is sent
+      });
       console.log("Land registered successfully:", result);
       Swal.fire({
         icon: "success",
@@ -230,6 +279,7 @@ const LandRecords = () => {
         emailAddress: "",
         ownershipType: "",
         coOwners: "",
+        thramNumber: "",
       });
 
       toggleModal();
@@ -481,6 +531,15 @@ const LandRecords = () => {
                       className="w-full p-2 border rounded"
                       placeholder="Co-Owners (if any)"
                     />
+                    <input
+                      type="text"
+                      id="thramNumber"
+                      value={formData.thramNumber}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border rounded"
+                      placeholder="Thram Number (e.g., 179)"
+                      required
+                    />
                   </div>
                 </div>
 
@@ -524,6 +583,7 @@ const LandRecords = () => {
                 <th className="border p-2 text-left">Land ID</th>
                 <th className="border p-2 text-left">Owner</th>
                 <th className="border p-2 text-left">Location</th>
+                <th className="border p-2 text-left">Thram Number</th>
                 <th className="border p-2 text-left">Date</th>
                 <th className="border p-2 text-center">Actions</th>
               </tr>
@@ -542,9 +602,15 @@ const LandRecords = () => {
                     <td className="border p-2 text-sm text-left">
                       {land.location}
                     </td>
+                    <td className="border p-2 text-sm">
+                      {land.thramNumber || "N/A"}
+                    </td>
                     <td className="border p-2 text-sm text-left">
-                      {new Date().toLocaleDateString()}{" "}
-                      {/* Placeholder for date */}
+                      {land.registrationDate
+                        ? new Date(land.registrationDate).toLocaleDateString()
+                        : land.date
+                        ? new Date(land.date).toLocaleDateString()
+                        : "N/A"}
                     </td>
                     <td className="border p-2 text-center">
                       <div className="flex justify-center gap-2">
@@ -572,7 +638,7 @@ const LandRecords = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="text-center p-2">
+                  <td colSpan="6" className="text-center p-2">
                     No lands available.
                   </td>
                 </tr>
@@ -719,6 +785,24 @@ const LandRecords = () => {
                       className="w-full p-2 border rounded"
                       placeholder="Co-Owners (if any)"
                     />
+                    <input
+                      type="text"
+                      id="thramNumber"
+                      value={editFormData.thramNumber}
+                      onChange={handleEditInputChange}
+                      className="w-full p-2 border rounded"
+                      placeholder="Thram Number (e.g., 179)"
+                      required
+                    />
+                    <input
+                      type="date"
+                      id="date"
+                      value={editFormData.date}
+                      onChange={handleEditInputChange}
+                      className="w-full p-2 border rounded"
+                      placeholder="Registration Date"
+                      required
+                    />
                   </div>
                 </div>
 
@@ -840,27 +924,40 @@ const LandRecords = () => {
                       </h3>
                       <p className="text-sm mt-1">
                         <strong>Owner Name:</strong>{" "}
-                        {currentLand.landDetails.ownerName}
+                        {currentLand.landDetails?.ownerName ||
+                          currentLand.ownerName ||
+                          currentLand.owner ||
+                          "N/A"}
                       </p>
                       <p className="text-sm mt-1">
                         <strong>CID Number:</strong>{" "}
-                        {currentLand.landDetails.cidNumber}
+                        {currentLand.landDetails?.cidNumber ||
+                          currentLand.cidNumber ||
+                          "N/A"}
                       </p>
                       <p className="text-sm mt-1">
                         <strong>Contact Number:</strong>{" "}
-                        {currentLand.landDetails.contactNumber}
+                        {currentLand.landDetails?.contactNumber ||
+                          currentLand.contactNumber ||
+                          "N/A"}
                       </p>
                       <p className="text-sm mt-1">
                         <strong>Email Address:</strong>{" "}
-                        {currentLand.landDetails.emailAddress}
+                        {currentLand.landDetails?.emailAddress ||
+                          currentLand.emailAddress ||
+                          "N/A"}
                       </p>
                       <p className="text-sm mt-1">
                         <strong>Ownership Type:</strong>{" "}
-                        {currentLand.landDetails.ownershipType}
+                        {currentLand.landDetails?.ownershipType ||
+                          currentLand.ownershipType ||
+                          "N/A"}
                       </p>
                       <p className="text-sm mt-1">
                         <strong>Co-Owners:</strong>{" "}
-                        {currentLand.landDetails.coOwners}
+                        {currentLand.landDetails?.coOwners ||
+                          currentLand.coOwners ||
+                          "N/A"}
                       </p>
                     </div>
                   </div>
@@ -872,24 +969,31 @@ const LandRecords = () => {
                       </h3>
                       <p className="text-sm mt-1">
                         <strong>Land Type:</strong>{" "}
-                        {currentLand.landDetails.landType}
+                        {currentLand.landDetails?.landType ||
+                          currentLand.landType ||
+                          "N/A"}
                       </p>
                       <p className="text-sm mt-1">
                         <strong>Land Size:</strong>{" "}
-                        {currentLand.landDetails.landSize}
+                        {currentLand.landDetails?.landSize ||
+                          currentLand.landSize ||
+                          "N/A"}
                       </p>
                       <p className="text-sm mt-1">
                         <strong>Boundary Details:</strong>{" "}
-                        {currentLand.landDetails.boundaryDetails}
+                        {currentLand.landDetails?.boundaryDetails ||
+                          currentLand.boundaryDetails ||
+                          "N/A"}
                       </p>
                     </div>
                     <div className="bg-gray-50  p-4 rounded-lg shadow-sm mt-6">
                       <h3 className="text-lg font-semibold text-[#142854] mb-3">
                         Documents
                       </h3>
+                      {/* Example for one document, repeat as needed for each document type */}
                       <div className="bg-gray-100 mb-2 rounded-lg p-2 border">
                         <a
-                          // href={selectedTransaction.documentUrl}
+                          // href={selectedTransaction?.documentUrl}
                           download
                           className="flex justify-between items-center w-full gap-2 text-gray-700 no-underline hover:text-gray-900"
                         >
@@ -900,45 +1004,7 @@ const LandRecords = () => {
                           </div>
                         </a>
                       </div>
-                      <div className="bg-gray-100 mb-2 rounded-lg p-2 border">
-                        <a
-                          // href={selectedTransaction.documentUrl}
-                          download
-                          className="flex justify-between items-center w-full gap-2 text-gray-700 no-underline hover:text-gray-900"
-                        >
-                          <span>File 1</span>
-                          <div className="flex flex-row gap-3">
-                            <AiOutlineEye className="text-lg" />
-                            <AiOutlineDownload className="text-lg" />
-                          </div>
-                        </a>
-                      </div>
-                      <div className="bg-gray-100 mb-2 rounded-lg p-2 border">
-                        <a
-                          // href={selectedTransaction.documentUrl}
-                          download
-                          className="flex justify-between items-center w-full gap-2 text-gray-700 no-underline hover:text-gray-900"
-                        >
-                          <span>File 1</span>
-                          <div className="flex flex-row gap-3">
-                            <AiOutlineEye className="text-lg" />
-                            <AiOutlineDownload className="text-lg" />
-                          </div>
-                        </a>
-                      </div>
-                      <div className="bg-gray-100 mb-2 rounded-lg p-2 border">
-                        <a
-                          // href={selectedTransaction.documentUrl}
-                          download
-                          className="flex justify-between items-center w-full gap-2 text-gray-700 no-underline hover:text-gray-900"
-                        >
-                          <span>File 1</span>
-                          <div className="flex flex-row gap-3">
-                            <AiOutlineEye className="text-lg" />
-                            <AiOutlineDownload className="text-lg" />
-                          </div>
-                        </a>
-                      </div>
+                      {/* Add more document blocks as needed, or map over an array if dynamic */}
                     </div>
                   </div>
                 </div>

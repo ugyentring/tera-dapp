@@ -14,6 +14,7 @@ const RegisterLand = () => {
     emailAddress: "",
     ownershipType: "",
     coOwners: "",
+    thramNumber: "", // Add thramNumber to form state
   });
 
   const handleChange = (e) => {
