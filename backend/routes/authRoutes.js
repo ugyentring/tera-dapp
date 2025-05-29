@@ -7,6 +7,7 @@ import {
   getGovtLandById,
   deleteGovtLandById,
 } from "../controllers/govtLandController.js";
+import { getAllTransactions } from "../controllers/transactionController.js";
 import upload from "../middleware/govtUpload.js";
 
 const router = express.Router();
@@ -37,5 +38,8 @@ router.get("/govtland/:id", getGovtLandById);
 
 // Route to DELETE a specific government land record by ID
 router.delete("/govtland/:id", deleteGovtLandById);
+
+// Add route for fetching transactions
+router.get("/transactions", getAllTransactions);
 
 export default router;
