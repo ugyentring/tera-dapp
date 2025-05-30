@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Transaction from "../models/Transaction.js";
 
 // Define the GovtLand schema
 const govtLandSchema = new mongoose.Schema({
@@ -237,5 +238,80 @@ export const getAllLandRecords = async (req, res) => {
     res.status(200).json(landRecords);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch land records" });
+  }
+};
+
+// Function to handle land purchase and transfer ownership
+export const buyGovtLand = async (req, res) => {
+  console.log("buyGovtLand controller called");
+  try {
+    // For multipart/form-data, fields are in req.body, files in req.file/req.files
+    const {
+      landId,
+      bank,
+      journalNumber,
+      buyerName,
+      buyerCid,
+      buyerContact,
+      buyerEmail,
+    } = req.body;
+    // Debug log to verify incoming fields
+    console.log("Buy request body:", req.body);
+    // Validate required fields
+    if (!landId || !buyerName || !buyerCid) {
+      return res.status(400).json({
+        message: "Missing required fields for purchase.",
+        received: req.body,
+      });
+    }
+    // Find the land record
+    const land = await GovtLand.findById(landId);
+    if (!land) {
+      return res.status(404).json({ message: "Land record not found." });
+    }
+    // Save transaction log
+    const transaction = new Transaction({
+      id: landId,
+      owner: buyerName,
+      land: landId,
+      date: new Date().toISOString(),
+      status: "Completed",
+      type: "Buy",
+      buyerInfo: {
+        name: buyerName,
+        email: buyerEmail || "",
+      },
+      sellerInfo: {
+        name: land.ownerName,
+        email: land.emailAddress,
+      },
+      landInfo: {
+        location: land.location,
+        size: land.landSize,
+      },
+      documentUrl: "",
+      reason: "Land purchase and ownership transfer",
+    });
+    await transaction.save();
+    // Transfer ownership
+    land.ownerName = buyerName;
+    land.cidNumber = buyerCid;
+    land.contactNumber = buyerContact || land.contactNumber;
+    land.emailAddress = buyerEmail || land.emailAddress;
+    land.ownershipType = "Private";
+    await land.save();
+    res.status(200).json({
+      message: "Land ownership transferred successfully.",
+      data: land,
+      transaction,
+    });
+  } catch (error) {
+    console.error("Error during land purchase/ownership transfer:", error);
+    res.status(500).json({
+      message: "Failed to complete land purchase.",
+      error: error.message,
+      stack: error.stack,
+      body: req.body,
+    });
   }
 };

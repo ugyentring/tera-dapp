@@ -21,10 +21,16 @@ function BuyLand() {
   const [selectedBank, setSelectedBank] = useState("");
   const [uploadedImage, setUploadedImage] = useState(null);
   const [journalNumber, setJournalNumber] = useState("");
+  const [buyerName, setBuyerName] = useState("");
+  const [buyerCid, setBuyerCid] = useState("");
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
 
   const isFormValid =
-    selectedBank && uploadedImage && journalNumber.trim() !== "";
+    selectedBank &&
+    uploadedImage &&
+    journalNumber.trim() !== "" &&
+    buyerName.trim() !== "" &&
+    buyerCid.trim() !== "";
 
   const itemsPerPage = 6;
 
@@ -77,6 +83,8 @@ function BuyLand() {
     setSelectedBank("");
     setUploadedImage(null);
     setJournalNumber("");
+    setBuyerName("");
+    setBuyerCid("");
     setPurchaseSuccess(false);
   };
 
@@ -121,7 +129,13 @@ function BuyLand() {
         const response = await axios.get(
           "http://localhost:5000/api/govtland/land-records"
         );
-        setAllTransactions(response.data);
+        // The backend returns { message, data: [...] }
+        const lands = Array.isArray(response.data.data)
+          ? response.data.data
+          : Array.isArray(response.data)
+          ? response.data
+          : [];
+        setAllTransactions(lands);
       } catch (error) {
         console.error("Failed to fetch land records", error);
       }
@@ -207,147 +221,97 @@ function BuyLand() {
               </button>
 
               <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2">
-                Transaction Overview
+                Land Details
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* Row 1 */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                    Transaction Details
-                  </h3>
-                  <p>
-                    <span className="font-semibold">Transaction ID:</span>{" "}
-                    {selectedTransaction.id}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Type:</span>{" "}
-                    {selectedTransaction.type}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Date:</span>{" "}
-                    {selectedTransaction.date}
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                    Owner Information
-                  </h3>
-                  <p>
-                    <span className="font-semibold">Name:</span>{" "}
-                    {selectedTransaction.owner}
-                  </p>
-                </div>
-
-                {/* Divider */}
-                <div className="col-span-2">
-                  <hr className="my-4 border-gray-300" />
-                </div>
-
-                {/* Row 2 */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                    Buyer Information
-                  </h3>
-                  {selectedTransaction.buyerInfo ? (
-                    <>
-                      <p>
-                        <span className="font-semibold">Name:</span>{" "}
-                        {selectedTransaction.buyerInfo.name}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Email:</span>{" "}
-                        {selectedTransaction.buyerInfo.email}
-                      </p>
-                    </>
-                  ) : (
-                    <p className="text-gray-500">N/A</p>
-                  )}
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                    Seller Information
-                  </h3>
-                  {selectedTransaction.sellerInfo ? (
-                    <>
-                      <p>
-                        <span className="font-semibold">Name:</span>{" "}
-                        {selectedTransaction.sellerInfo.name}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Email:</span>{" "}
-                        {selectedTransaction.sellerInfo.email}
-                      </p>
-                    </>
-                  ) : (
-                    <p className="text-gray-500">N/A</p>
-                  )}
-                </div>
-
-                {/* Divider */}
-                <div className="col-span-2">
-                  <hr className="my-4 border-gray-300" />
-                </div>
-
-                {/* Row 3 */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                    Land Information
+                    Basic Information
                   </h3>
                   <p>
                     <span className="font-semibold">Land ID:</span>{" "}
-                    {selectedTransaction.id}
+                    {selectedTransaction.id || selectedTransaction._id || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-semibold">Owner:</span>{" "}
+                    {selectedTransaction.owner || selectedTransaction.ownerName}
                   </p>
                   <p>
                     <span className="font-semibold">Location:</span>{" "}
                     {selectedTransaction.location}
                   </p>
                   <p>
+                    <span className="font-semibold">Thram Number:</span>{" "}
+                    {selectedTransaction.thramNumber ||
+                      selectedTransaction.thramNo}
+                  </p>
+                  <p>
                     <span className="font-semibold">Size:</span>{" "}
                     {selectedTransaction.landSize}
                   </p>
+                  {selectedTransaction.registrationDate ||
+                  selectedTransaction.date ? (
+                    <p>
+                      <span className="font-semibold">Registration Date:</span>{" "}
+                      {new Date(
+                        selectedTransaction.registrationDate ||
+                          selectedTransaction.date
+                      ).toLocaleDateString()}
+                    </p>
+                  ) : null}
                 </div>
-
                 <div>
                   <h3 className="text-lg font-semibold text-gray-700 mb-2">
                     Documents
                   </h3>
                   <ul className="list-disc pl-5 space-y-2 text-blue-600">
-                    <li>
-                      <a
-                        href={selectedTransaction.documentUrl1}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline flex items-center"
-                      >
-                        <AiOutlineDownload className="mr-2" />
-                        Document 1
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href={selectedTransaction.documentUrl2}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline flex items-center"
-                      >
-                        <AiOutlineDownload className="mr-2" />
-                        Document 2
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href={selectedTransaction.documentUrl3}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline flex items-center"
-                      >
-                        <AiOutlineDownload className="mr-2" />
-                        Document 3
-                      </a>
-                    </li>
+                    {selectedTransaction.documentUrl1 && (
+                      <li>
+                        <a
+                          href={selectedTransaction.documentUrl1}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:underline flex items-center"
+                        >
+                          <AiOutlineDownload className="mr-2" />
+                          Document 1
+                        </a>
+                      </li>
+                    )}
+                    {selectedTransaction.documentUrl2 && (
+                      <li>
+                        <a
+                          href={selectedTransaction.documentUrl2}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:underline flex items-center"
+                        >
+                          <AiOutlineDownload className="mr-2" />
+                          Document 2
+                        </a>
+                      </li>
+                    )}
+                    {selectedTransaction.documentUrl3 && (
+                      <li>
+                        <a
+                          href={selectedTransaction.documentUrl3}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:underline flex items-center"
+                        >
+                          <AiOutlineDownload className="mr-2" />
+                          Document 3
+                        </a>
+                      </li>
+                    )}
+                    {!selectedTransaction.documentUrl1 &&
+                      !selectedTransaction.documentUrl2 &&
+                      !selectedTransaction.documentUrl3 && (
+                        <li className="text-gray-500">
+                          No documents available
+                        </li>
+                      )}
                   </ul>
                 </div>
               </div>
@@ -364,40 +328,8 @@ function BuyLand() {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Left Section */}
+                {/* Right Section: Purchase Form */}
                 <div>
-                  <img
-                    src={require("../../assets/images/land.jpg")}
-                    alt="Land"
-                    className="w-full h-64 object-cover rounded-lg mb-4"
-                  />
-                  <p>
-                    <strong>Land ID:</strong> {selectedTransaction.id}
-                  </p>
-                  <div className="flex justify-between mb-4">
-                    <div>
-                      <p>
-                        <strong>Owner:</strong> {selectedTransaction.owner}
-                      </p>
-                      <p>
-                        <strong>Location:</strong>{" "}
-                        {selectedTransaction.location}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p>
-                        <strong>Size:</strong> {selectedTransaction.landSize}
-                      </p>
-                      <p>
-                        <strong>Thram No:</strong> {selectedTransaction.thramNo}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Section */}
-                <div>
-                  {/* Bank Dropdown */}
                   <div className="mb-4">
                     <label
                       htmlFor="bank-select"
@@ -470,6 +402,41 @@ function BuyLand() {
                       className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-gray-700 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                     />
                   </div>
+
+                  {/* Buyer Name */}
+                  <div className="mb-4">
+                    <label
+                      htmlFor="buyer-name"
+                      className="block mb-2 font-semibold text-gray-700"
+                    >
+                      Buyer Name
+                    </label>
+                    <input
+                      type="text"
+                      id="buyer-name"
+                      value={buyerName}
+                      onChange={(e) => setBuyerName(e.target.value)}
+                      placeholder="Enter your name"
+                      className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-gray-700 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                    />
+                  </div>
+                  {/* Buyer CID */}
+                  <div className="mb-4">
+                    <label
+                      htmlFor="buyer-cid"
+                      className="block mb-2 font-semibold text-gray-700"
+                    >
+                      Buyer CID
+                    </label>
+                    <input
+                      type="text"
+                      id="buyer-cid"
+                      value={buyerCid}
+                      onChange={(e) => setBuyerCid(e.target.value)}
+                      placeholder="Enter your CID number"
+                      className="w-full border border-gray-300 rounded-md px-2 py-1.5 text-gray-700 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -528,7 +495,56 @@ function BuyLand() {
               {/* Action Buttons */}
               <div className="flex justify-center space-x-4 mt-6">
                 <button
-                  onClick={handlePurchase}
+                  onClick={async () => {
+                    if (!isFormValid) return;
+                    try {
+                      // Prepare form data
+                      const formData = new FormData();
+                      formData.append(
+                        "landId",
+                        selectedTransaction.id || selectedTransaction._id
+                      );
+                      formData.append("bank", selectedBank);
+                      formData.append("journalNumber", journalNumber);
+                      formData.append("buyerName", buyerName);
+                      formData.append("buyerCid", buyerCid);
+                      if (uploadedImage) {
+                        // If uploadedImage is a base64 string, convert to Blob
+                        if (uploadedImage.startsWith("data:")) {
+                          const arr = uploadedImage.split(",");
+                          const mime = arr[0].match(/:(.*?);/)[1];
+                          const bstr = atob(arr[1]);
+                          let n = bstr.length;
+                          const u8arr = new Uint8Array(n);
+                          while (n--) {
+                            u8arr[n] = bstr.charCodeAt(n);
+                          }
+                          formData.append(
+                            "image",
+                            new Blob([u8arr], { type: mime }),
+                            "upload.jpg"
+                          );
+                        } else {
+                          formData.append("image", uploadedImage);
+                        }
+                      }
+                      // Send purchase request
+                      await axios.post(
+                        "http://localhost:5000/api/govtland/buy",
+                        formData,
+                        {
+                          headers: { "Content-Type": "multipart/form-data" },
+                        }
+                      );
+                      setPurchaseSuccess(true);
+                      setTimeout(() => {
+                        closeBuyModal();
+                        navigate("/dashboard");
+                      }, 1000); // Show success popup for 1s then redirect
+                    } catch (error) {
+                      alert("Failed to complete purchase. Please try again.");
+                    }
+                  }}
                   className={`px-4 py-2 rounded transition text-white ${
                     isFormValid
                       ? "bg-green-600 hover:bg-green-700"
@@ -550,12 +566,11 @@ function BuyLand() {
         )}
 
         {/* land image card */}
-
         <div className="max-w-screen-xl mx-auto px-4 py-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {currentTransactions.map((transaction) => (
               <div
-                key={transaction.id}
+                key={transaction.id || transaction._id}
                 className="flex flex-col bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
               >
                 <img
@@ -567,7 +582,7 @@ function BuyLand() {
 
                 <div className="flex flex-col flex-1 p-4">
                   <h3 className="text-lg font-semibold mb-3 truncate">
-                    Land ID: {transaction.id}
+                    Land ID: {transaction.id || transaction._id || "N/A"}
                   </h3>
 
                   <div className="flex flex-col sm:flex-row justify-between text-gray-600 text-sm gap-4 mb-4">
@@ -587,7 +602,9 @@ function BuyLand() {
                       </p>
                       <p>
                         <strong>Thram No:</strong>{" "}
-                        {transaction.thramCopy || "N/A"}
+                        {transaction.thramNumber ||
+                          transaction.thramNo ||
+                          "N/A"}
                       </p>
                     </div>
                   </div>
