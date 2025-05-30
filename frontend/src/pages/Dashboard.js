@@ -25,6 +25,7 @@ import {
 import { AiOutlineDownload } from "react-icons/ai";
 import { AiOutlineEye } from "react-icons/ai";
 import { getGovtLands } from "../services/authService";
+import axios from "axios";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -44,54 +45,73 @@ const Dashboard = () => {
   const [pendingTransactions, setPendingTransactions] = useState(0);
   const itemsPerPage = 5;
 
+  // Get user email or CID from localStorage (set at login)
+  const userEmail = localStorage.getItem("userEmail");
+  const userCid = localStorage.getItem("userCid");
+
   useEffect(() => {
+    // Fetch all land records and filter by owner (for plots owned)
+    const fetchLands = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/govtland/land-records"
+        );
+        // Filter lands by owner email or CID
+        let userLands = response.data.data || response.data || [];
+        if (userEmail) {
+          userLands = userLands.filter(
+            (land) => land.emailAddress === userEmail
+          );
+        } else if (userCid) {
+          userLands = userLands.filter((land) => land.cidNumber === userCid);
+        }
+        setRegisteredLands(userLands.length);
+      } catch (error) {
+        setRegisteredLands(0);
+      }
+    };
+    fetchLands();
+  }, [userEmail, userCid]);
+
+  useEffect(() => {
+    // Fetch transactions for this user
     const fetchTransactions = async () => {
       try {
-        const data = await getGovtLands();
-        console.log("API Response:", data);
-
-        // Map backend data to include required fields
-        const mappedTransactions = data.map((land) => ({
-          landId: land.id,
-          date: land.date,
-          status: land.status || "N/A",
-          owner: land.owner,
-          location: land.location,
-          landType: land.landType,
-        }));
-
-        setAllTransactions(mappedTransactions);
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
-      }
-    };
-
-    fetchTransactions();
-  }, []);
-
-  useEffect(() => {
-    const fetchMetrics = async () => {
-      try {
-        const data = await getGovtLands();
-
-        // Calculate metrics
-        setRegisteredLands(data.length);
-        setApprovedTransactions(
-          data.filter((txn) => txn.status?.toLowerCase() === "approved").length
+        const response = await axios.get(
+          "http://localhost:5000/api/transactions"
         );
-        setOngoingDisputes(
-          data.filter((txn) => txn.status?.toLowerCase() === "dispute").length
+        let txns = response.data.data || response.data || [];
+        // Filter by user (buyer or seller email/cid)
+        if (userEmail) {
+          txns = txns.filter(
+            (t) =>
+              t.buyerInfo?.email === userEmail ||
+              t.sellerInfo?.email === userEmail
+          );
+        } else if (userCid) {
+          txns = txns.filter(
+            (t) => t.buyerInfo?.id === userCid || t.sellerInfo?.id === userCid
+          );
+        }
+        setAllTransactions(txns);
+        setApprovedTransactions(
+          txns.filter((t) => t.status?.toLowerCase() === "approved").length
         );
         setPendingTransactions(
-          data.filter((txn) => txn.status?.toLowerCase() === "pending").length
+          txns.filter((t) => t.status?.toLowerCase() === "pending").length
+        );
+        setOngoingDisputes(
+          txns.filter((t) => t.type?.toLowerCase() === "dispute").length
         );
       } catch (error) {
-        console.error("Error fetching metrics:", error);
+        setAllTransactions([]);
+        setApprovedTransactions(0);
+        setPendingTransactions(0);
+        setOngoingDisputes(0);
       }
     };
-
-    fetchMetrics();
-  }, []);
+    fetchTransactions();
+  }, [userEmail, userCid]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
