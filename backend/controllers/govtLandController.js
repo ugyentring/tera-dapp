@@ -8,7 +8,7 @@ const govtLandSchema = new mongoose.Schema({
   landSize: { type: String, required: true },
   boundaryDetails: { type: String, required: true },
   ownerName: { type: String, required: true },
-  cidNumber: { type: String, required: true },
+  cid: { type: String, required: true }, // changed from cidNumber
   contactNumber: { type: String, required: true },
   emailAddress: { type: String, required: true },
   ownershipType: { type: String, required: true },
@@ -37,7 +37,7 @@ export const registerGovtLand = async (req, res) => {
       landSize: body.landSize,
       boundaryDetails: body.boundaryDetails,
       ownerName: body.ownerName,
-      cidNumber: body.cidNumber,
+      cid: body.cid,
       contactNumber: body.contactNumber,
       emailAddress: body.emailAddress,
       ownershipType: body.ownershipType,
@@ -73,7 +73,7 @@ export const registerLand = async (req, res) => {
       landSize,
       boundaryDetails,
       ownerName,
-      cidNumber,
+      cid,
       contactNumber,
       emailAddress,
       ownershipType,
@@ -88,7 +88,7 @@ export const registerLand = async (req, res) => {
       landSize,
       boundaryDetails,
       ownerName,
-      cidNumber,
+      cid,
       contactNumber,
       emailAddress,
       ownershipType,
@@ -120,7 +120,7 @@ export const getAllGovtLand = async (req, res) => {
       location: land.location,
       landSize: land.landSize,
       boundaryDetails: land.boundaryDetails,
-      cidNumber: land.cidNumber,
+      cid: land.cid,
       contactNumber: land.contactNumber,
       emailAddress: land.emailAddress,
       ownershipType: land.ownershipType,
@@ -295,7 +295,7 @@ export const buyGovtLand = async (req, res) => {
     await transaction.save();
     // Transfer ownership
     land.ownerName = buyerName;
-    land.cidNumber = buyerCid;
+    land.cid = buyerCid;
     land.contactNumber = buyerContact || land.contactNumber;
     land.emailAddress = buyerEmail || land.emailAddress;
     land.ownershipType = "Private";

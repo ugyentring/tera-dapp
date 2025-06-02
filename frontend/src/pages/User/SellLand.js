@@ -8,7 +8,9 @@ function SellLand() {
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
-  const [showSidebarText, setShowSidebarText] = useState(window.innerWidth >= 1024);
+  const [showSidebarText, setShowSidebarText] = useState(
+    window.innerWidth >= 1024
+  );
   const [activeSidebarItem, setActiveSidebarItem] = useState(1);
 
   // Form states
@@ -39,31 +41,51 @@ function SellLand() {
     let errs = {};
 
     if (!formData.plotId.trim()) errs.plotId = "Plot ID is required.";
-    if (!formData.size.trim() || isNaN(formData.size) || Number(formData.size) <= 0) errs.size = "Valid Size is required.";
+    if (
+      !formData.size.trim() ||
+      isNaN(formData.size) ||
+      Number(formData.size) <= 0
+    )
+      errs.size = "Valid Size is required.";
     if (!formData.dzongkhag.trim()) errs.dzongkhag = "Dzongkhag is required.";
     if (!formData.gewog.trim()) errs.gewog = "Gewog is required.";
     if (!formData.village.trim()) errs.village = "Village is required.";
-    if (!formData.ownershipStatus.trim()) errs.ownershipStatus = "Ownership Status is required.";
+    if (!formData.ownershipStatus.trim())
+      errs.ownershipStatus = "Ownership Status is required.";
 
-    if (!formData.price.trim() || isNaN(formData.price) || Number(formData.price) <= 0) errs.price = "Valid Price is required.";
+    if (
+      !formData.price.trim() ||
+      isNaN(formData.price) ||
+      Number(formData.price) <= 0
+    )
+      errs.price = "Valid Price is required.";
     if (!formData.saleType.trim()) errs.saleType = "Sale Type is required.";
-    if (!formData.availability.trim()) errs.availability = "Availability is required.";
+    if (!formData.availability.trim())
+      errs.availability = "Availability is required.";
 
-    if (!formData.landDescription.trim()) errs.landDescription = "Land Description is required.";
+    if (!formData.landDescription.trim())
+      errs.landDescription = "Land Description is required.";
 
-    if (!formData.sellerName.trim()) errs.sellerName = "Seller Name is required.";
-    if (!formData.contactNumber.trim() || !/^\+?\d{7,15}$/.test(formData.contactNumber.trim())) 
+    if (!formData.sellerName.trim())
+      errs.sellerName = "Seller Name is required.";
+    if (
+      !formData.contactNumber.trim() ||
+      !/^\+?\d{7,15}$/.test(formData.contactNumber.trim())
+    )
       errs.contactNumber = "Valid Contact Number is required.";
 
-    if (!confirmed) errs.confirmed = "You must confirm that details are accurate.";
+    if (!confirmed)
+      errs.confirmed = "You must confirm that details are accurate.";
 
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) {
-      const firstError = Object.values(errors)[0] || "Please fill in all required fields correctly.";
+      const firstError =
+        Object.values(errors)[0] ||
+        "Please fill in all required fields correctly.";
       swal.fire({
         icon: "error",
         title: "Validation Error",
@@ -72,12 +94,47 @@ function SellLand() {
       });
       return;
     }
-    swal.fire({
-      title: "Success!",
-      text: "Details submitted successfully.",
-      icon: "success",
-      confirmButtonColor: "#142854",
-    });
+
+    try {
+      // Prepare form data for backend
+      const userCid = localStorage.getItem("userCid");
+      const payload = {
+        plotId: formData.plotId,
+        size: formData.size,
+        dzongkhag: formData.dzongkhag,
+        gewog: formData.gewog,
+        village: formData.village,
+        ownershipStatus: formData.ownershipStatus,
+        price: formData.price,
+        saleType: formData.saleType,
+        availability: formData.availability,
+        landDescription: formData.landDescription,
+        sellerName: formData.sellerName,
+        contactNumber: formData.contactNumber,
+        isForSale: true, // Mark as listed for sale
+        cid: userCid, // Attach user CID for ownership
+      };
+      // Optionally handle images/documents upload here
+      await fetch("http://localhost:5000/api/govtland/land-records", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      swal.fire({
+        title: "Success!",
+        text: "Land listed for sale successfully.",
+        icon: "success",
+        confirmButtonColor: "#142854",
+      });
+      handleCancel();
+    } catch (error) {
+      swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to list land for sale. Please try again.",
+        confirmButtonColor: "#142854",
+      });
+    }
   };
 
   const handleLogout = () => {
@@ -158,14 +215,20 @@ function SellLand() {
         {/* Header for Desktop */}
         <div className="rounded-lg hidden sm:flex justify-between items-center mb-6 bg-white z-10 shadow-md p-4">
           <div className="flex items-center gap-4 ">
-            <button onClick={() => setSidebarOpen((o) => !o)} className="lg:hidden mr-4">
+            <button
+              onClick={() => setSidebarOpen((o) => !o)}
+              className="lg:hidden mr-4"
+            >
               <FiMenu className="text-2xl text-gray-700" />
             </button>
             <h1 className="font-semibold text-gray-800 ml-5">Sell Land</h1>
           </div>
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <FiUser className="text-2xl cursor-pointer mr-5" onClick={toggleDropdown} />
+              <FiUser
+                className="text-2xl cursor-pointer mr-5"
+                onClick={toggleDropdown}
+              />
               {dropdownOpen && (
                 <div className="absolute right-5 mt-2 bg-white border rounded shadow-lg w-48 origin-top-right z-20">
                   <ul className="py-2 flex flex-col items-center justify-center">
@@ -195,7 +258,9 @@ function SellLand() {
 
           {/* Land Details */}
           <div className="mb-10">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-5">Land Details</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-5">
+              Land Details
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {[
                 { name: "plotId", placeholder: "Plot ID" },
@@ -220,7 +285,9 @@ function SellLand() {
                     aria-label={placeholder}
                   />
                   {errors[name] && (
-                    <span className="text-red-600 text-xs mt-1">{errors[name]}</span>
+                    <span className="text-red-600 text-xs mt-1">
+                      {errors[name]}
+                    </span>
                   )}
                 </div>
               ))}
@@ -262,7 +329,9 @@ function SellLand() {
 
           {/* Price and Sale Information */}
           <div className="mb-10">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-5">Price and Sale Information</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-5">
+              Price and Sale Information
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {[
                 { name: "price", placeholder: "Price" },
@@ -284,7 +353,9 @@ function SellLand() {
                     aria-label={placeholder}
                   />
                   {errors[name] && (
-                    <span className="text-red-600 text-xs mt-1">{errors[name]}</span>
+                    <span className="text-red-600 text-xs mt-1">
+                      {errors[name]}
+                    </span>
                   )}
                 </div>
               ))}
@@ -293,7 +364,9 @@ function SellLand() {
 
           {/* Land Description */}
           <div className="mb-10">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-5">Land Description</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-5">
+              Land Description
+            </h3>
             <textarea
               rows={5}
               placeholder="Land Description"
@@ -308,13 +381,17 @@ function SellLand() {
               aria-label="Land Description"
             />
             {errors.landDescription && (
-              <span className="text-red-600 text-xs mt-1">{errors.landDescription}</span>
+              <span className="text-red-600 text-xs mt-1">
+                {errors.landDescription}
+              </span>
             )}
           </div>
 
           {/* Seller Details */}
           <div className="mb-10">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-5">Seller Details</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-5">
+              Seller Details
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {[
                 { name: "sellerName", placeholder: "Seller Name" },
@@ -335,7 +412,9 @@ function SellLand() {
                     aria-label={placeholder}
                   />
                   {errors[name] && (
-                    <span className="text-red-600 text-xs mt-1">{errors[name]}</span>
+                    <span className="text-red-600 text-xs mt-1">
+                      {errors[name]}
+                    </span>
                   )}
                 </div>
               ))}
@@ -378,8 +457,12 @@ function SellLand() {
                 errors.confirmed ? "border-red-500" : ""
               }`}
             />
-            <label htmlFor="confirmation" className="cursor-pointer select-none text-sm text-gray-900">
-              I confirm that the details provided above are accurate to the best of my knowledge.
+            <label
+              htmlFor="confirmation"
+              className="cursor-pointer select-none text-sm text-gray-900"
+            >
+              I confirm that the details provided above are accurate to the best
+              of my knowledge.
             </label>
           </div>
           {errors.confirmed && (

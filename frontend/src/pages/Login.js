@@ -5,8 +5,6 @@ import logo from "../assets/images/logo.png";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { jwtDecode } from "jwt-decode";
 
-
-
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,7 +19,23 @@ const Login = () => {
       localStorage.setItem("token", data.token);
       const decodedToken = jwtDecode(data.token);
       localStorage.setItem("userEmail", decodedToken.email);
-      navigate("/dashboard");
+      localStorage.setItem("userRole", decodedToken.role); // Store userRole
+      localStorage.setItem("userCid", decodedToken.cid || ""); // Store userCid (may be empty for admin)
+      // Store user info in localStorage for Sidebar and other components
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          email: decodedToken.email,
+          role: decodedToken.role,
+          cid: decodedToken.cid,
+        })
+      );
+      // Redirect based on role
+      if (decodedToken.role === "admin") {
+        navigate("/dashboard"); // Admin dashboard route
+      } else {
+        navigate("/dashboard"); // User dashboard route (can be changed if needed)
+      }
     } catch (err) {
       setError("Invalid email or password. Please try again.");
     }
@@ -34,10 +48,14 @@ const Login = () => {
       </div>
       <div className="w-full md:w-2/3 flex flex-col justify-center items-center bg-[#F8F8F8] p-8 sm:p-16">
         <h2 className="text-3xl font-bold text-[#1A2A48] mb-6">Log In</h2>
-        {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+        )}
         <form onSubmit={handleLogin} className="w-full sm:w-96 space-y-6">
           <div>
-            <label className="block text-sm font-medium text-[#1A2A48]">Email</label>
+            <label className="block text-sm font-medium text-[#1A2A48]">
+              Email
+            </label>
             <input
               type="email"
               value={email}
@@ -49,7 +67,9 @@ const Login = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#1A2A48]">Password</label>
+            <label className="block text-sm font-medium text-[#1A2A48]">
+              Password
+            </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -64,7 +84,11 @@ const Login = () => {
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <EyeSlashIcon className="w-6 h-6" /> : <EyeIcon className="w-6 h-6" />}
+                {showPassword ? (
+                  <EyeSlashIcon className="w-6 h-6" />
+                ) : (
+                  <EyeIcon className="w-6 h-6" />
+                )}
               </button>
             </div>
           </div>

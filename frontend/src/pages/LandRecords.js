@@ -52,7 +52,7 @@ const LandRecords = () => {
     landSize: "",
     boundaryDetails: "",
     ownerName: "",
-    cidNumber: "",
+    cid: "",
     contactNumber: "",
     emailAddress: "",
     ownershipType: "",
@@ -70,7 +70,7 @@ const LandRecords = () => {
     landSize: "",
     boundaryDetails: "",
     ownerName: "",
-    cidNumber: "",
+    cid: "",
     contactNumber: "",
     emailAddress: "",
     ownershipType: "",
@@ -103,7 +103,7 @@ const LandRecords = () => {
       location: land.location || "", // Corrected to match the backend field
       landSize: land.landSize || "",
       boundaryDetails: land.boundaryDetails || "",
-      cidNumber: land.cidNumber || "",
+      cid: land.cid || land.cidNumber || "",
       contactNumber: land.contactNumber || "",
       emailAddress: land.emailAddress || "",
       ownershipType: land.ownershipType || "",
@@ -274,7 +274,7 @@ const LandRecords = () => {
         landSize: "",
         boundaryDetails: "",
         ownerName: "",
-        cidNumber: "",
+        cid: "",
         contactNumber: "",
         emailAddress: "",
         ownershipType: "",
@@ -489,8 +489,8 @@ const LandRecords = () => {
                     />
                     <input
                       type="text"
-                      id="cidNumber"
-                      value={formData.cidNumber}
+                      id="cid"
+                      value={formData.cid}
                       onChange={handleInputChange}
                       className="w-full p-2 border rounded"
                       placeholder="CID Number"
@@ -743,8 +743,8 @@ const LandRecords = () => {
                     />
                     <input
                       type="text"
-                      id="cidNumber"
-                      value={editFormData.cidNumber}
+                      id="cid"
+                      value={editFormData.cid}
                       onChange={handleEditInputChange}
                       className="w-full p-2 border rounded"
                       placeholder="CID Number"
@@ -931,8 +931,8 @@ const LandRecords = () => {
                       </p>
                       <p className="text-sm mt-1">
                         <strong>CID Number:</strong>{" "}
-                        {currentLand.landDetails?.cidNumber ||
-                          currentLand.cidNumber ||
+                        {currentLand.landDetails?.cid ||
+                          currentLand.cid ||
                           "N/A"}
                       </p>
                       <p className="text-sm mt-1">

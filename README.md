@@ -3,8 +3,8 @@ This is the tere clone pushed on Github
 Hello, from the clas computer
 
 admin
-gvtmail = bhutantera@gvt.bt
-gvtpassword = Bhutangovt@123
+gvtmail = admin@gmail.com
+gvtpassword = password123
 
 user
 email= ugyen2@gmail.com

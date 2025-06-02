@@ -2,7 +2,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
-import User from "../models/User.js"; // Ensure the User model is correctly imported
+import User from "../models/User.js";
 
 dotenv.config();
 
@@ -14,16 +14,17 @@ const connectDB = async () => {
     console.log("✅ MongoDB connected successfully");
 
     // Check if the predefined user (supervisor) exists
-    const existingUser = await User.findOne({ email: "bhutantera@gvt.bt" });
+    const existingUser = await User.findOne({ email: "admin@gmail.com" });
 
     if (!existingUser) {
-      const hashedPassword = await bcrypt.hash("Bhutangovt@123", 10);
+      const hashedPassword = await bcrypt.hash("password123", 10);
       const newUser = new User({
-        cid: "9876543210", // Example CID for supervisor
-        email: "bhutantera@gvt.bt",
-        phone: "1234567890",
+        cid: "12345678901",
+        email: "admin@gmail.com",
+        phone: "17777777", // No phone needed for admin
         password: hashedPassword,
         isSupervisor: true, // Mark this user as supervisor
+        role: "admin", // Set role to admin
       });
 
       await newUser.save();

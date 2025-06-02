@@ -9,12 +9,12 @@ const RegisterLand = () => {
     landSize: "",
     boundaryDetails: "",
     ownerName: "",
-    cidNumber: "",
+    cid: "",
     contactNumber: "",
     emailAddress: "",
     ownershipType: "",
     coOwners: "",
-    thramNumber: "", // Add thramNumber to form state
+    thramNumber: "",
   });
 
   const handleChange = (e) => {

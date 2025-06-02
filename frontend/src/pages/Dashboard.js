@@ -43,32 +43,39 @@ const Dashboard = () => {
   const [approvedTransactions, setApprovedTransactions] = useState(0);
   const [ongoingDisputes, setOngoingDisputes] = useState(0);
   const [pendingTransactions, setPendingTransactions] = useState(0);
+  const [userLands, setUserLands] = useState([]); // Store user's lands
   const itemsPerPage = 5;
 
-  // Get user CID from localStorage (set at login)
+  // Get user CID and role from localStorage (set at login)
   const userCid = localStorage.getItem("userCid");
+  const userRole = localStorage.getItem("userRole");
 
   useEffect(() => {
-    // Fetch all land records and filter by CID (for plots owned)
+    // Fetch all land records for admin, or user-specific for users
     const fetchLands = async () => {
       try {
         const response = await axios.get(
           "http://localhost:5000/api/govtland/land-records"
         );
-        // Filter lands by CID
-        let userLands = response.data.data || response.data || [];
-        if (userCid) {
-          userLands = userLands.filter((land) => land.cidNumber === userCid);
+        let allLands = response.data.data || response.data || [];
+        if (userRole === "admin") {
+          setRegisteredLands(allLands.length); // Show total for admin
+          setUserLands([]); // No userLands for admin
+        } else if (userRole === "user" && userCid) {
+          const userLands = allLands.filter((land) => land.cid === userCid);
+          setRegisteredLands(userLands.length); // Show user count for user
+          setUserLands(userLands);
+        } else {
+          setRegisteredLands(0);
+          setUserLands([]);
         }
-        setRegisteredLands(userLands.length); // Number of plots
-        // Optionally, store userLands for listing details
-        // setUserLands(userLands);
       } catch (error) {
         setRegisteredLands(0);
+        setUserLands([]);
       }
     };
     fetchLands();
-  }, [userCid]);
+  }, [userCid, userRole]);
 
   useEffect(() => {
     // Fetch transactions for this user
@@ -79,7 +86,7 @@ const Dashboard = () => {
         );
         let txns = response.data.data || response.data || [];
         // Filter by user CID only (remove userEmail logic)
-        if (userCid) {
+        if (userRole === "user" && userCid) {
           txns = txns.filter(
             (t) => t.buyerInfo?.id === userCid || t.sellerInfo?.id === userCid
           );
@@ -102,7 +109,7 @@ const Dashboard = () => {
       }
     };
     fetchTransactions();
-  }, [userCid]);
+  }, [userCid, userRole]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -740,6 +747,55 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* Registered Land List Section (only for users) */}
+        {userRole === "user" && userLands.length > 0 && (
+          <div className="bg-white shadow-xl rounded-lg p-6 mt-8 overflow-x-auto">
+            <h2 className="font-semibold text-xl text-gray-800 mb-5">
+              My Registered Lands
+            </h2>
+            <table className="min-w-full leading-normal mt-3">
+              <thead>
+                <tr className="bg-gray-100 text-gray-700 uppercase text-sm font-semibold">
+                  <th className="py-3 px-4 text-left border-b border-gray-200">
+                    Location
+                  </th>
+                  <th className="py-3 px-4 text-left border-b border-gray-200">
+                    Thram Number
+                  </th>
+                  <th className="py-3 px-4 text-left border-b border-gray-200">
+                    Size
+                  </th>
+                  <th className="py-3 px-4 text-left border-b border-gray-200">
+                    Type
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {userLands.map((land) => (
+                  <tr
+                    key={land._id}
+                    className="hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <td className="py-3 px-4 border-b border-gray-200 text-sm">
+                      {land.location}
+                    </td>
+                    <td className="py-3 px-4 border-b border-gray-200 text-sm">
+                      {land.thramNumber}
+                    </td>
+                    <td className="py-3 px-4 border-b border-gray-200 text-sm">
+                      {land.size}
+                    </td>
+                    <td className="py-3 px-4 border-b border-gray-200 text-sm">
+                      {land.type}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
         <div className="mt-4">
           <button
             onClick={() => navigate("/register-land")}

@@ -12,6 +12,7 @@ import {
 import logo from "../assets/images/logo.png";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -26,29 +27,9 @@ const Sidebar = () => {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const itemsPerPage = 5;
   const [userEmail, setUserEmail] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+  const [allTransactions, setAllTransactions] = useState([]); // State to store all transactions
 
-  const allTransactions = Array.from({ length: 100 }, (_, index) => ({
-    id: `TXN-${index + 1}`,
-    owner: `Owner ${index + 1}`,
-    land: `LP-${index + 1}`,
-    date: `Jan ${index + 1}, 2025`,
-    status:
-      index % 3 === 0 ? "Rejected" : index % 3 === 1 ? "Pending" : "Approved", // Randomly assign status
-    type: index % 3 === 0 ? "Buy" : index % 3 === 1 ? "Sell" : "Inheritance", // Randomly assign transaction type
-    buyerInfo: {
-      name: `Buyer ${index + 1}`,
-      email: `buyer${index + 1}@example.com`,
-    },
-    sellerInfo: {
-      name: `Seller ${index + 1}`,
-      email: `seller${index + 1}@example.com`,
-    },
-    landInfo: {
-      location: `Location ${index + 1}`,
-      size: `${(index + 1) * 10} sq.m`,
-    },
-    documentUrl: "asdf", // Sample document URL for download
-  }));
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentTransactions = allTransactions.slice(
@@ -130,16 +111,39 @@ const Sidebar = () => {
     }
   }, []);
   useEffect(() => {
-    if (userEmail) {
-      if (userEmail === "bhutantera@gvt.bt") {
-        setActiveSidebarItem(1); // Government: Dashboard
+    const storedRole = localStorage.getItem("userRole");
+    setUserRole(storedRole);
+  }, []);
+
+  useEffect(() => {
+    if (userRole) {
+      if (userRole === "admin") {
+        setActiveSidebarItem(1); // Admin: Dashboard
       } else {
-        setActiveSidebarItem(6); // Non-Government: User Dashboard
+        setActiveSidebarItem(6); // User: Dashboard
       }
     }
-  }, [userEmail]);
+  }, [userRole]);
 
-  const isGovernmentUser = userEmail === "bhutantera@gvt.bt";
+  const isAdmin = userRole === "admin";
+
+  // Fetch all transactions from the backend (with fallback to empty array)
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        // Use the correct backend URL for your dev environment
+        const response = await axios.get(
+          "http://localhost:5000/api/transactions"
+        );
+        // If your backend returns { data: [...] }
+        setAllTransactions(response.data.data || response.data || []);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+        setAllTransactions([]);
+      }
+    };
+    fetchTransactions();
+  }, []);
 
   return (
     <div
@@ -176,7 +180,7 @@ const Sidebar = () => {
       </button>
 
       <ul className="space-y-2 w-full flex flex-col items-center justify-start mt-4">
-        {isGovernmentUser && (
+        {isAdmin && (
           <SidebarItem
             icon={<MdDashboard className="text-xl" />}
             label="Dashboard"
@@ -185,7 +189,7 @@ const Sidebar = () => {
             showText={showSidebarText}
           />
         )}
-        {isGovernmentUser && (
+        {isAdmin && (
           <SidebarItem
             icon={<MdOutlineHome className="text-xl" />}
             label="Land Records"
@@ -194,7 +198,7 @@ const Sidebar = () => {
             showText={showSidebarText}
           />
         )}
-        {isGovernmentUser && (
+        {isAdmin && (
           <SidebarItem
             icon={<MdOutlineTransferWithinAStation className="text-xl" />}
             label="Transactions"
@@ -203,7 +207,7 @@ const Sidebar = () => {
             showText={showSidebarText}
           />
         )}
-        {isGovernmentUser && (
+        {isAdmin && (
           <SidebarItem
             icon={<MdOutlineGavel className="text-xl" />}
             label="Land Disputes"
@@ -212,7 +216,7 @@ const Sidebar = () => {
             showText={showSidebarText}
           />
         )}
-        {isGovernmentUser && (
+        {isAdmin && (
           <SidebarItem
             icon={<MdOutlineGavel className="text-xl" />}
             label="Verify Ownership"
@@ -221,7 +225,7 @@ const Sidebar = () => {
             showText={showSidebarText}
           />
         )}
-        {!isGovernmentUser && (
+        {!isAdmin && (
           <SidebarItem
             icon={<MdDashboard className="text-xl" />}
             label="Dashboard"
@@ -230,7 +234,7 @@ const Sidebar = () => {
             showText={showSidebarText}
           />
         )}
-        {!isGovernmentUser && (
+        {!isAdmin && (
           <SidebarItem
             icon={<MdShoppingCart className="text-xl" />}
             label="Buy Land"
@@ -239,7 +243,7 @@ const Sidebar = () => {
             showText={showSidebarText}
           />
         )}
-        {!isGovernmentUser && (
+        {!isAdmin && (
           <SidebarItem
             icon={<MdAttachMoney className="text-xl" />}
             label="Sell Land"
@@ -248,7 +252,7 @@ const Sidebar = () => {
             showText={showSidebarText}
           />
         )}
-        {!isGovernmentUser && (
+        {!isAdmin && (
           <SidebarItem
             icon={<MdCompareArrows className="text-xl" />}
             label="Transfer Ownership"
@@ -257,7 +261,7 @@ const Sidebar = () => {
             showText={showSidebarText}
           />
         )}
-        {!isGovernmentUser && (
+        {!isAdmin && (
           <SidebarItem
             icon={<MdGavel className="text-xl" />}
             label="Dispute Land"

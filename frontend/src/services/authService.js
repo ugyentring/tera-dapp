@@ -60,7 +60,7 @@ export const registerLand = async (formData) => {
     data.append("landSize", formData.landSize);
     data.append("boundaryDetails", formData.boundaryDetails);
     data.append("ownerName", formData.ownerName);
-    data.append("cidNumber", formData.cidNumber);
+    data.append("cid", formData.cid); // changed from cidNumber
     data.append("contactNumber", formData.contactNumber);
     data.append("emailAddress", formData.emailAddress);
     data.append("ownershipType", formData.ownershipType);
