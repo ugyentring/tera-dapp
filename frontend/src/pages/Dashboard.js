@@ -45,33 +45,30 @@ const Dashboard = () => {
   const [pendingTransactions, setPendingTransactions] = useState(0);
   const itemsPerPage = 5;
 
-  // Get user email or CID from localStorage (set at login)
-  const userEmail = localStorage.getItem("userEmail");
+  // Get user CID from localStorage (set at login)
   const userCid = localStorage.getItem("userCid");
 
   useEffect(() => {
-    // Fetch all land records and filter by owner (for plots owned)
+    // Fetch all land records and filter by CID (for plots owned)
     const fetchLands = async () => {
       try {
         const response = await axios.get(
           "http://localhost:5000/api/govtland/land-records"
         );
-        // Filter lands by owner email or CID
+        // Filter lands by CID
         let userLands = response.data.data || response.data || [];
-        if (userEmail) {
-          userLands = userLands.filter(
-            (land) => land.emailAddress === userEmail
-          );
-        } else if (userCid) {
+        if (userCid) {
           userLands = userLands.filter((land) => land.cidNumber === userCid);
         }
-        setRegisteredLands(userLands.length);
+        setRegisteredLands(userLands.length); // Number of plots
+        // Optionally, store userLands for listing details
+        // setUserLands(userLands);
       } catch (error) {
         setRegisteredLands(0);
       }
     };
     fetchLands();
-  }, [userEmail, userCid]);
+  }, [userCid]);
 
   useEffect(() => {
     // Fetch transactions for this user
@@ -81,14 +78,8 @@ const Dashboard = () => {
           "http://localhost:5000/api/transactions"
         );
         let txns = response.data.data || response.data || [];
-        // Filter by user (buyer or seller email/cid)
-        if (userEmail) {
-          txns = txns.filter(
-            (t) =>
-              t.buyerInfo?.email === userEmail ||
-              t.sellerInfo?.email === userEmail
-          );
-        } else if (userCid) {
+        // Filter by user CID only (remove userEmail logic)
+        if (userCid) {
           txns = txns.filter(
             (t) => t.buyerInfo?.id === userCid || t.sellerInfo?.id === userCid
           );
@@ -111,7 +102,7 @@ const Dashboard = () => {
       }
     };
     fetchTransactions();
-  }, [userEmail, userCid]);
+  }, [userCid]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
