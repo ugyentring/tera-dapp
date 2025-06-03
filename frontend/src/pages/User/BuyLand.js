@@ -610,6 +610,10 @@ function BuyLand() {
                           transaction.thramNo ||
                           "N/A"}
                       </p>
+                      <p>
+                        <strong>Price:</strong>{" "}
+                        {transaction.price ? `Nu. ${transaction.price}` : "N/A"}
+                      </p>
                     </div>
                   </div>
 
