@@ -37,35 +37,22 @@ function SellLand() {
   // Validation errors
   const [errors, setErrors] = useState({});
 
+  // Lands owned by the user
+  const [userLands, setUserLands] = useState([]);
+  const [selectedLandId, setSelectedLandId] = useState("");
+
   const validate = () => {
     let errs = {};
 
-    if (!formData.plotId.trim()) errs.plotId = "Plot ID is required.";
-    if (
-      !formData.size.trim() ||
-      isNaN(formData.size) ||
-      Number(formData.size) <= 0
-    )
-      errs.size = "Valid Size is required.";
-    if (!formData.dzongkhag.trim()) errs.dzongkhag = "Dzongkhag is required.";
-    if (!formData.gewog.trim()) errs.gewog = "Gewog is required.";
-    if (!formData.village.trim()) errs.village = "Village is required.";
-    if (!formData.ownershipStatus.trim())
-      errs.ownershipStatus = "Ownership Status is required.";
-
+    // Only validate price, landDescription, sellerName, contactNumber, and confirmation
     if (
       !formData.price.trim() ||
       isNaN(formData.price) ||
       Number(formData.price) <= 0
     )
       errs.price = "Valid Price is required.";
-    if (!formData.saleType.trim()) errs.saleType = "Sale Type is required.";
-    if (!formData.availability.trim())
-      errs.availability = "Availability is required.";
-
     if (!formData.landDescription.trim())
       errs.landDescription = "Land Description is required.";
-
     if (!formData.sellerName.trim())
       errs.sellerName = "Seller Name is required.";
     if (
@@ -73,7 +60,6 @@ function SellLand() {
       !/^\+?\d{7,15}$/.test(formData.contactNumber.trim())
     )
       errs.contactNumber = "Valid Contact Number is required.";
-
     if (!confirmed)
       errs.confirmed = "You must confirm that details are accurate.";
 
@@ -82,6 +68,15 @@ function SellLand() {
   };
 
   const handleSubmit = async () => {
+    if (!selectedLandId) {
+      swal.fire({
+        icon: "error",
+        title: "Validation Error",
+        text: "Please select a land to list for sale.",
+        confirmButtonColor: "#142854",
+      });
+      return;
+    }
     if (!validate()) {
       const firstError =
         Object.values(errors)[0] ||
@@ -94,29 +89,17 @@ function SellLand() {
       });
       return;
     }
-
     try {
-      // Prepare form data for backend
-      const userCid = localStorage.getItem("userCid");
+      // Only update the selected land's isForSale, price, saleType, availability, etc.
       const payload = {
-        plotId: formData.plotId,
-        size: formData.size,
-        dzongkhag: formData.dzongkhag,
-        gewog: formData.gewog,
-        village: formData.village,
-        ownershipStatus: formData.ownershipStatus,
+        isForSale: true,
         price: formData.price,
         saleType: formData.saleType,
         availability: formData.availability,
         landDescription: formData.landDescription,
-        sellerName: formData.sellerName,
-        contactNumber: formData.contactNumber,
-        isForSale: true, // Mark as listed for sale
-        cid: userCid, // Attach user CID for ownership
       };
-      // Optionally handle images/documents upload here
-      await fetch("http://localhost:5000/api/govtland/land-records", {
-        method: "POST",
+      await fetch(`http://localhost:5000/api/govtland/${selectedLandId}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
@@ -127,6 +110,7 @@ function SellLand() {
         confirmButtonColor: "#142854",
       });
       handleCancel();
+      setSelectedLandId("");
     } catch (error) {
       swal.fire({
         icon: "error",
@@ -193,6 +177,27 @@ function SellLand() {
     setErrors((errs) => ({ ...errs, [name]: undefined }));
   };
 
+  // Fetch user's registered lands on mount
+  useEffect(() => {
+    const fetchUserLands = async () => {
+      const userCid = localStorage.getItem("userCid");
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/govtland/land-records"
+        );
+        const data = await response.json();
+        // Only lands owned by this user
+        const owned = (data.data || data).filter(
+          (land) => land.cid === userCid
+        );
+        setUserLands(owned);
+      } catch (err) {
+        setUserLands([]);
+      }
+    };
+    fetchUserLands();
+  }, []);
+
   useEffect(() => {
     const handleResize = () => {
       setSidebarOpen(window.innerWidth >= 1024);
@@ -256,109 +261,97 @@ function SellLand() {
             List Land for Sale
           </h2>
 
-          {/* Land Details */}
-          <div className="mb-10">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-5">
-              Land Details
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {[
-                { name: "plotId", placeholder: "Plot ID" },
-                { name: "size", placeholder: "Size (Acres)" },
-                { name: "dzongkhag", placeholder: "Dzongkhag" },
-                { name: "gewog", placeholder: "Gewog" },
-                { name: "village", placeholder: "Village" },
-                { name: "ownershipStatus", placeholder: "Ownership Status" },
-              ].map(({ name, placeholder }, i) => (
-                <div key={i} className="flex flex-col">
-                  <input
-                    type="text"
-                    name={name}
-                    placeholder={placeholder}
-                    value={formData[name]}
-                    onChange={handleInputChange}
-                    className={`w-full border-2 rounded-md p-2.5 text-sm focus:outline-none focus:ring-2 transition-all duration-300 ${
-                      errors[name]
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-gray-300 focus:ring-[#142854]"
-                    }`}
-                    aria-label={placeholder}
-                  />
-                  {errors[name] && (
-                    <span className="text-red-600 text-xs mt-1">
-                      {errors[name]}
-                    </span>
-                  )}
-                </div>
+          {/* Select Land to List */}
+          <div className="mb-8">
+            <label className="block mb-2 font-semibold text-gray-800">
+              Select Land to List for Sale
+            </label>
+            <select
+              className="w-full border-2 rounded-md p-2.5 text-sm mb-2"
+              value={selectedLandId}
+              onChange={(e) => setSelectedLandId(e.target.value)}
+              disabled={userLands.length === 0}
+            >
+              <option value="">
+                {userLands.length === 0
+                  ? "No registered land found for your CID."
+                  : "-- Select your registered land --"}
+              </option>
+              {userLands.map((land) => (
+                <option key={land.id || land._id} value={land.id || land._id}>
+                  {land.location} | Thram: {land.thramNumber} | Size:{" "}
+                  {land.landSize}
+                </option>
               ))}
-            </div>
-
-            {/* Upload Images Button */}
-            <div className="mt-6 flex items-center space-x-4">
-              <label
-                htmlFor="imageUpload"
-                className="cursor-pointer rounded-md border border-[#003366] bg-[#003366] px-4 py-2 text-white hover:bg-[#142854] transition-colors"
-              >
-                Upload Images
-              </label>
-              <input
-                id="imageUpload"
-                type="file"
-                multiple
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageChange}
-              />
-              {uploadedImages.length > 0 && (
-                <span className="text-gray-700 text-sm">
-                  {uploadedImages.length} image(s) selected
-                </span>
-              )}
-            </div>
-            <div className="grid grid-cols-3 gap-2 mt-4">
-              {uploadedImages.map(({ file, preview }, idx) => (
-                <img
-                  key={idx}
-                  src={preview}
-                  alt={`Uploaded preview ${idx + 1}`}
-                  className="rounded-md object-cover w-full h-28"
-                />
-              ))}
-            </div>
+            </select>
+            {userLands.length === 0 && (
+              <div className="text-red-500 text-sm mt-2">
+                You have no registered land records. Please register land first.
+              </div>
+            )}
           </div>
+
+          {/* Land Details */}
+          {selectedLandId ? (
+            <div className="mb-10 p-4 bg-blue-50 rounded">
+              <h3 className="text-lg font-semibold mb-3 text-[#142854]">
+                Selected Land Details
+              </h3>
+              {(() => {
+                const land = userLands.find(
+                  (l) => (l.id || l._id) === selectedLandId
+                );
+                if (!land)
+                  return <span className="text-red-500">Land not found.</span>;
+                return (
+                  <ul className="text-sm text-gray-700">
+                    <li>
+                      <b>Location:</b> {land.location}
+                    </li>
+                    <li>
+                      <b>Thram Number:</b> {land.thramNumber}
+                    </li>
+                    <li>
+                      <b>Size:</b> {land.landSize}
+                    </li>
+                    <li>
+                      <b>Type:</b> {land.landType}
+                    </li>
+                    <li>
+                      <b>Owner:</b> {land.ownerName}
+                    </li>
+                  </ul>
+                );
+              })()}
+            </div>
+          ) : null}
 
           {/* Price and Sale Information */}
           <div className="mb-10">
             <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-5">
-              Price and Sale Information
+              Price
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {[
-                { name: "price", placeholder: "Price" },
-                { name: "saleType", placeholder: "Sale Type" },
-                { name: "availability", placeholder: "Availability" },
-              ].map(({ name, placeholder }, i) => (
-                <div key={i} className="flex flex-col">
-                  <input
-                    type="text"
-                    name={name}
-                    placeholder={placeholder}
-                    value={formData[name]}
-                    onChange={handleInputChange}
-                    className={`w-full border-2 rounded-md p-2.5 text-sm focus:outline-none focus:ring-2 transition-all duration-300 ${
-                      errors[name]
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-gray-300 focus:ring-[#142854]"
-                    }`}
-                    aria-label={placeholder}
-                  />
-                  {errors[name] && (
-                    <span className="text-red-600 text-xs mt-1">
-                      {errors[name]}
-                    </span>
-                  )}
-                </div>
-              ))}
+              <div className="flex flex-col">
+                <input
+                  type="text"
+                  name="price"
+                  placeholder="Price"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  className={`w-full border-2 rounded-md p-2.5 text-sm focus:outline-none focus:ring-2 transition-all duration-300 ${
+                    errors.price
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-[#142854]"
+                  }`}
+                  aria-label="Price"
+                />
+                {errors.price && (
+                  <span className="text-red-600 text-xs mt-1">
+                    {errors.price}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

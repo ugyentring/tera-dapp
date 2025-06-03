@@ -6,6 +6,7 @@ import connectDB from "./config/db.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import govtLandRoutes from "./routes/govtLandRoutes.js"; // Corrected import for govtLandRoutes
+import transactionRoutes from "./routes/transactionRoutes.js"; // Import transactionRoutes
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/api/contact", contactRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/govtland", govtLandRoutes);
+app.use("/api/transactions", transactionRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
