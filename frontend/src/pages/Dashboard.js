@@ -784,7 +784,7 @@ const Dashboard = () => {
                       {land.thramNumber}
                     </td>
                     <td className="py-3 px-4 border-b border-gray-200 text-sm">
-                      {land.size}
+                      {land.size ? `${land.size} sqm` : "N/A"}
                     </td>
                     <td className="py-3 px-4 border-b border-gray-200 text-sm">
                       {land.type}

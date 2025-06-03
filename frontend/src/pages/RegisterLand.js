@@ -18,13 +18,34 @@ const RegisterLand = () => {
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, type } = e.target;
+    // For landSize, only allow positive numbers
+    if (name === "landSize") {
+      // Prevent negative or zero values
+      if (type === "number" && +value < 1 && value !== "") return;
+      setFormData({ ...formData, [name]: value.replace(/[^\d]/g, "") });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Always submit landSize as "<number> sqm"
+      const submitData = {
+        ...formData,
+        landSize: formData.landSize.endsWith(" sqm")
+          ? formData.landSize
+          : formData.landSize + " sqm",
+        // coOwners: split by comma if not empty
+        coOwners: formData.coOwners
+          ? formData.coOwners
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : [],
+      };
       const response = await fetch(
         "http://localhost:5000/api/govtland/register",
         {
@@ -32,7 +53,7 @@ const RegisterLand = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(submitData),
         }
       );
 
@@ -64,12 +85,14 @@ const RegisterLand = () => {
                 .replace(/^./, (str) => str.toUpperCase())}
             </label>
             <input
-              type="text"
+              type={key === "landSize" ? "number" : "text"}
               name={key}
               value={formData[key]}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required={key !== "coOwners"}
+              min={key === "landSize" ? 1 : undefined}
+              step={key === "landSize" ? 1 : undefined}
             />
           </div>
         ))}
