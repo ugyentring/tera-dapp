@@ -122,12 +122,12 @@ function BuyLand() {
     }
   };
 
-  // Fetch land records from the backend
+  // Fetch lands for sale from the backend
   useEffect(() => {
-    const fetchLandRecords = async () => {
+    const fetchLandsForSale = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/govtland/land-records"
+          "http://localhost:5000/api/govtland/for-sale"
         );
         // The backend returns { message, data: [...] }
         const lands = Array.isArray(response.data.data)
@@ -135,13 +135,17 @@ function BuyLand() {
           : Array.isArray(response.data)
           ? response.data
           : [];
-        setAllTransactions(lands);
+        // Optionally filter out lands owned by the current user
+        const userCid = localStorage.getItem("userCid");
+        const filtered = userCid
+          ? lands.filter((land) => land.cid !== userCid)
+          : lands;
+        setAllTransactions(filtered);
       } catch (error) {
-        console.error("Failed to fetch land records", error);
+        console.error("Failed to fetch lands for sale", error);
       }
     };
-
-    fetchLandRecords();
+    fetchLandsForSale();
   }, []);
 
   useEffect(() => {

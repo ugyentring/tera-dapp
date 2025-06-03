@@ -19,6 +19,8 @@ const govtLandSchema = new mongoose.Schema({
   taxClearance: { type: String },
   registrationDate: { type: Date, default: Date.now },
   thramNumber: { type: String, required: true },
+  isForSale: { type: Boolean, default: false },
+  price: { type: Number },
 });
 
 // Create the GovtLand model
@@ -312,6 +314,44 @@ export const buyGovtLand = async (req, res) => {
       error: error.message,
       stack: error.stack,
       body: req.body,
+    });
+  }
+};
+
+// Controller to fetch only lands for sale
+export const getLandsForSale = async (req, res) => {
+  try {
+    const landsForSale = await GovtLand.find({ isForSale: true });
+    // Transform data for frontend
+    const transformed = landsForSale.map((land) => ({
+      id: land._id,
+      owner: land.ownerName,
+      landType: land.landType,
+      location: land.location,
+      landSize: land.landSize,
+      boundaryDetails: land.boundaryDetails,
+      cid: land.cid,
+      contactNumber: land.contactNumber,
+      emailAddress: land.emailAddress,
+      ownershipType: land.ownershipType,
+      coOwners: land.coOwners,
+      thramNumber: land.thramNumber,
+      ownershipProof: land.ownershipProof,
+      thramCopy: land.thramCopy,
+      surveyReport: land.surveyReport,
+      taxClearance: land.taxClearance,
+      date: land.registrationDate,
+      isForSale: land.isForSale,
+      price: land.price,
+    }));
+    res.status(200).json({
+      message: "Lands for sale fetched successfully",
+      data: transformed,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch lands for sale",
+      error: error.message,
     });
   }
 };

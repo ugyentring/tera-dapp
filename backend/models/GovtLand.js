@@ -8,11 +8,20 @@ const govtLandSchema = new mongoose.Schema(
     boundaryDetails: { type: String, required: true },
 
     ownerName: { type: String, required: true },
-    cidNumber: { type: String, required: true },
+    cid: { type: String, required: true },
     contactNumber: { type: String, required: true },
     emailAddress: { type: String, required: true },
     ownershipType: { type: String, required: true },
-    coOwners: { type: String },
+    coOwners: { type: [String], default: [] },
+
+    ownershipProof: { type: String },
+    thramCopy: { type: String },
+    surveyReport: { type: String },
+    taxClearance: { type: String },
+    registrationDate: { type: Date, default: Date.now },
+    thramNumber: { type: String, required: true },
+    isForSale: { type: Boolean, default: false },
+    price: { type: Number },
   },
   { timestamps: true }
 );

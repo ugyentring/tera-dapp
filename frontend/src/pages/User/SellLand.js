@@ -90,13 +90,13 @@ function SellLand() {
       return;
     }
     try {
-      // Only update the selected land's isForSale, price, saleType, availability, etc.
+      // Only update the selected land's isForSale, price, and landDescription
       const payload = {
         isForSale: true,
         price: formData.price,
-        saleType: formData.saleType,
-        availability: formData.availability,
         landDescription: formData.landDescription,
+        sellerName: formData.sellerName,
+        contactNumber: formData.contactNumber,
       };
       await fetch(`http://localhost:5000/api/govtland/${selectedLandId}`, {
         method: "PATCH",
